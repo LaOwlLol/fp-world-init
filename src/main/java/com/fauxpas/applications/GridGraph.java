@@ -12,28 +12,48 @@ import javafx.stage.Stage;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.GNode;
 
-public class BasicGraph extends Application {
+public class GridGraph extends Application {
 
 	Graph basicGraph;
 	double width;
 	double height;
+    double cellWidth;
+    double cellHeight;
+    int horzCellCount;
+    int vertCellCount;
 	int pointRadius;
 
-	public BasicGraph() {
+	public GridGraph() {
 
 		this.width = 600;
 		this.height = 500;
 		this.pointRadius = 5;
+        this.horzCellCount = 30;
+        this.vertCellCount = 25;
+        this.cellHeight = this.height/this.vertCellCount;
+        this.cellWidth = this.width/this.horzCellCount;
 
 		this.basicGraph = new Graph();
-		for (int i = 0; i < 5; ++i) {
-			this.basicGraph.addVertex(new GNode(Math.random() * this.width , Math.random() * this.height) );
+		
+        for (int y = 0; y <= this.vertCellCount; ++y) {
+            for (int x = 0; x <= this.horzCellCount; ++x) {
+			     this.basicGraph.addVertex(new GNode( (x * this.cellWidth)+5, (y * this.cellWidth)+5 ) );
+            }
 		}
 
-		this.basicGraph.addEdge(this.basicGraph.getVertices().get(0), this.basicGraph.getVertices().get(4));
-		this.basicGraph.addEdge(this.basicGraph.getVertices().get(1), this.basicGraph.getVertices().get(4));
-		this.basicGraph.addEdge(this.basicGraph.getVertices().get(2), this.basicGraph.getVertices().get(3));
-		this.basicGraph.addEdge(this.basicGraph.getVertices().get(3), this.basicGraph.getVertices().get(0));
+        List<GNode> verticies = this.basicGraph.getVertices();
+
+        for (int i = 1; i <= this.horzCellCount; ++i) {
+            this.basicGraph.addEdge(verticies.get(i-1), verticies.get(i));
+        }
+
+        for (int i = this.horzCellCount+1; i < (this.horzCellCount+1)*(this.vertCellCount+1); ++i) {
+            if ( i % (this.horzCellCount+1) != 0) {
+                this.basicGraph.addEdge(verticies.get(i-1), verticies.get(i));
+            }
+            this.basicGraph.addEdge(verticies.get(i-(this.horzCellCount+1)), verticies.get(i));
+        }
+	
 	}
 
 	public static void main(String[] args) {
@@ -44,7 +64,7 @@ public class BasicGraph extends Application {
     public void start(Stage primaryStage) {
     	primaryStage.setTitle("Graph Operations Test");
     	Group root = new Group();
-        Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
+        Canvas canvas = new Canvas(new Double(this.width+10).intValue(), new Double(this.height+10).intValue());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         drawGraph(gc);
         root.getChildren().add(canvas);
