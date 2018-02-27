@@ -19,6 +19,22 @@ public class AdjacencyList {
         this.adjacentNodes.addAll(_e);
     }
 
+    public boolean isAdjacent(GNode _toNode) {
+        return this.adjacentNodes.contains(_toNode);
+    }
+
+    public boolean isRoot(GNode _v) {
+        return root.isSameNode(_v);
+    }
+
+    public GNode getRoot() {
+        return root;
+    }
+
+    public List<GNode> getAdjacencies() {
+        return adjacentNodes;
+    }
+
     /**
     Adds a node (_toNode) to the adjacentNodes list, if the following is true:
      - _toNode is not contained in this adjacentNodes list (only one node from A to B).
@@ -31,7 +47,6 @@ public class AdjacencyList {
         }
     }
 
-
     public void removeAdjacentNode(GNode _toNode) {
         if (this.isAdjacent(_toNode)) {
             this.adjacentNodes.remove(_toNode);
@@ -42,11 +57,4 @@ public class AdjacencyList {
         this.adjacentNodes = new ArrayList<GNode>();
     }
 
-    public boolean isAdjacent(GNode _toNode) {
-        return this.adjacentNodes.contains(_toNode);
-    }
-
-    public boolean isRoot(GNode _v) {
-        return root.isSameNode(_v);
-    }
 }

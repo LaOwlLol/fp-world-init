@@ -10,6 +10,10 @@ public class GNode {
         this.setLocation(_p);
     }
 
+    public GNode(double _x, double _y) {
+        this.setLocation(new Point(_x, _y));
+    }
+
     public Point location(){
         return this.location;
     }
