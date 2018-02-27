@@ -18,6 +18,10 @@ public class GNode {
         this.location = _p;
     }
 
+    public void setLocation(double _x, double _y) {
+        this.setLocation(new Point(_x, _y) );
+    }
+
     public boolean isSameNode(GNode _v) {
         return this.location().effectivelyEqual(_v.location(), 0.01);
     }
