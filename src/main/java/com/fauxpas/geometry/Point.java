@@ -46,6 +46,30 @@ public class Point {
         return Math.sqrt( Math.pow((this.x()-_other.x()), 2)+Math.pow((this.y()-_other.y()), 2));
     }
 
+    public int compareX(Point _other) {
+        if (this.x() < _other.x()) {
+            return -1;
+        }
+        else if (this.x() > _other.x()) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public int compareY(Point _other) {
+        if (this.y() < _other.y()) {
+            return -1;
+        }
+        else if (this.y() > _other.y()) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+
     public boolean effectivelyEqual(Point _other, double _tolerance) {
         return ( Math.abs(this.x()- _other.x()) < _tolerance)
                 && ( Math.abs(this.y() - _other.y()) < _tolerance );
