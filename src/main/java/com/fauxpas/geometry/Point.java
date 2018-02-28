@@ -30,16 +30,28 @@ public class Point {
         return Math.round(this.x());
     }
 
-    public double l2Norm() {
+    public double l1() {
+        return this.x() + this.y();
+    }
+
+    public double l2() {
         return (this.x()*this.x()) + (this.y() *this.y());
     }
 
-    public double lenght() {
-        return Math.sqrt(this.l2Norm());
+    public double euclideanLength() {
+        return Math.sqrt(this.l2());
+    }
+
+    public double euclideanDistance(Point _other) {
+        return Math.sqrt( Math.pow((this.x()-_other.x()), 2)+Math.pow((this.y()-_other.y()), 2));
     }
 
     public boolean effectivelyEqual(Point _other, double _tolerance) {
         return ( Math.abs(this.x()- _other.x()) < _tolerance)
                 && ( Math.abs(this.y() - _other.y()) < _tolerance );
+    }
+
+    public static Point EuclideanShift(Point _z, Point _s) {
+        return new Point(  _z.x() , (_z.y() + _z.euclideanDistance(_s)) );
     }
 }
