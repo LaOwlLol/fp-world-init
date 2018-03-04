@@ -75,7 +75,4 @@ public class Point {
                 && ( Math.abs(this.y() - _other.y()) < _tolerance );
     }
 
-    public static Point EuclideanShift(Point _z, Point _s) {
-        return new Point(  _z.x() , (_z.y() + _z.euclideanDistance(_s)) );
-    }
 }
