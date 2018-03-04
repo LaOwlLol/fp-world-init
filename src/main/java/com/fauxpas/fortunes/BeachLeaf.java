@@ -54,7 +54,7 @@ public class BeachLeaf extends BeachNode {
      * @return X Location of the site generating this arch of the beach line.
      */
     @Override
-    public double getX() {
+    public double getX(Point _l) {
         return this.getSite().x();
     }
 }

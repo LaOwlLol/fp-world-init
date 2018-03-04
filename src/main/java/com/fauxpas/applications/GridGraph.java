@@ -1,6 +1,8 @@
 package com.fauxpas.applications;
 
 import java.util.List;
+
+import com.fauxpas.geometry.Point;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -44,14 +46,14 @@ public class GridGraph extends Application {
         List<GNode> verticies = this.basicGraph.getVertices();
 
         for (int i = 1; i <= this.horzCellCount; ++i) {
-            this.basicGraph.addEdge(verticies.get(i-1), verticies.get(i));
+            this.basicGraph.addHalfEdge(verticies.get(i-1), verticies.get(i));
         }
 
         for (int i = this.horzCellCount+1; i < (this.horzCellCount+1)*(this.vertCellCount+1); ++i) {
             if ( i % (this.horzCellCount+1) != 0) {
-                this.basicGraph.addEdge(verticies.get(i-1), verticies.get(i));
+                this.basicGraph.addHalfEdge(verticies.get(i-1), verticies.get(i));
             }
-            this.basicGraph.addEdge(verticies.get(i-(this.horzCellCount+1)), verticies.get(i));
+            this.basicGraph.addHalfEdge(verticies.get(i-(this.horzCellCount+1)), verticies.get(i));
         }
 	
 	}
@@ -86,11 +88,26 @@ public class GridGraph extends Application {
 
     public void drawEdges(GraphicsContext gc) {
     	for (List<GNode> edge: this.basicGraph.getEdges()) {
-    		gc.strokeLine(edge.get(0).location().x(),
-    			edge.get(0).location().y(), 
-    			edge.get(1).location().x(), 
-    			edge.get(1).location().y());
+    		    drawArrow(gc,edge.get(0).location(), edge.get(1).location());
     	}
+    }
+
+    private void drawArrow(GraphicsContext gc, Point tail, Point tip)
+    {
+        int barb = 4;
+        double phi = Math.toRadians(40);
+        double dy = tip.y() - tail.y();
+        double dx = tip.x() - tail.x();
+        double theta = Math.atan2(dy, dx);
+        double x, y, rho = theta + phi;
+        gc.strokeLine(tail.x(), tail.y(), tip.x(), tip.y());
+        for(int j = 0; j < 2; j++)
+        {
+            x = tip.x() - barb * Math.cos(rho);
+            y = tip.y() - barb * Math.sin(rho);
+            gc.strokeLine(tip.x(), tip.y(), x, y);
+            rho = theta - phi;
+        }
     }
 
 }

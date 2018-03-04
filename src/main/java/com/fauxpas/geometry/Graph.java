@@ -18,19 +18,8 @@ public class Graph {
 		}		
 	}
 
-	public void addEdge(GNode _root, GNode _v) {
-
-		if (getAdjacencyList(_v).isPresent()) {
-			getAdjacencyList(_v).ifPresent( (el) -> {
-				if (!el.isAdjacent(_root)) {
-					ifHasAdjListAddNode(_root, _v);
-				}
-			});
-		}
-		else {
-			ifHasAdjListAddNode(_root, _v);
-		}
-		
+	public void addHalfEdge(GNode _root, GNode _v) {
+		ifHasAdjListAddNode(_root, _v);
 	}
 
 	public void addVertexWithEdges(AdjacencyList _e) {

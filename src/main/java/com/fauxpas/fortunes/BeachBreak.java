@@ -1,42 +1,65 @@
 package com.fauxpas.fortunes;
 
 import com.fauxpas.geometry.AdjacencyList;
-import com.fauxpas.geometry.GNode;
+import com.fauxpas.geometry.Point;
 
 import java.util.Optional;
 
 public class BeachBreak extends BeachNode {
 
-    private BeachLeaf left;
-    private BeachLeaf right;
-    private Optional<AdjacencyList> endPoint;
+    private BeachNode left;
+    private BeachNode right;
+    private Point site;
+    private AdjacencyList endPoint;
 
-    public BeachBreak(BeachLeaf _l, BeachLeaf _r) {
-        this.left = _l;
-        this.right = _r;
-
-        this.endPoint = Optional.empty();
+    public BeachBreak(Point _s) {
+        this.left = null;
+        this.right = null;
+        this.site = _s;
+        this.endPoint = null;
     }
 
-    public void setEndPoint(Optional<AdjacencyList> _al) {
+    public void setEndPoint(AdjacencyList _al) {
         this.endPoint = _al;
     }
 
     public Optional<AdjacencyList> getEndPoint() {
-        return endPoint;
+        return Optional.ofNullable(this.endPoint);
     }
 
-    public BeachLeaf getLeft() {
-        return left;
+    public void setLeft(BeachNode _b) {
+        this.left = _b;
     }
 
-    public BeachLeaf getRight() {
-        return right;
+    public Optional<BeachNode> getLeft() {
+        return Optional.ofNullable(left);
     }
 
+    public void setRight(BeachNode _b) {
+        this.right = _b;
+    }
+
+    public Optional<BeachNode> getRight() { return Optional.ofNullable(right); }
+
+    public Point getSite() {
+        return this.site;
+    }
+
+    /**
+     * Get the location of the breakpoint which is at
+     * a point q being the center of a circle passing through
+     * left site, right site, and event site.
+     *
+     * @param _l an event site to calculate the break point
+     * @return
+     */
     @Override
-    public double getX() {
-        //todo this is not right at all.
-        return 0.0;
+    public double getX(Point _l) {
+        double ma = (_l.y() - this.left.getSite().y()) / ( _l.x() - this.left.getSite().x() );
+        double mb = (this.right.getSite().y() - _l.y() ) / (this.right.getSite().x() - _l.x() );
+        double numerator = ma*mb*(this.left.getSite().y() - this.right.getSite().y()) +
+                mb * (this.left.getSite().x() + _l.x()) -
+                ma*( _l.x() + this.right.getSite().x() );
+        return numerator / (2* (mb - ma));
     }
 }
