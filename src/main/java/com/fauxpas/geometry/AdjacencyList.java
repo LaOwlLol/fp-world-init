@@ -36,10 +36,10 @@ public class AdjacencyList {
     }
 
     /**
-    Adds a node (_toNode) to the adjacentNodes list, if the following is true:
-     - _toNode is not contained in this adjacentNodes list (only one node from A to B).
-     
-    @param _toNode an adjacent node on a graph.
+     * Adds a node (_toNode) to the adjacentNodes list, if the following is true:
+     * - _toNode is not contained in this adjacentNodes list (only one node from A to B).
+     *
+     * @param _toNode an adjacent node on a graph.
     */
     public void addAdjacency(GNode _toNode) {
         if (!this.isAdjacent(_toNode)) {
@@ -57,4 +57,9 @@ public class AdjacencyList {
         this.adjacentNodes = new ArrayList<GNode>();
     }
 
+    public void addAdjacencies(AdjacencyList _edges) {
+        for (GNode n: _edges.getAdjacencies()) {
+            this.addAdjacency(n);
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.fauxpas.fortunes;
 import com.fauxpas.geometry.GNode;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.Point;
+import com.fauxpas.geometry.AdjacencyList;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,14 +15,12 @@ public class FortuneAlgorithm {
     private Graph voronoi;
     private BeachNode beachline;
     private PriorityQueue<FortuneEvent> events;
-    private PriorityQueue<FortuneEvent> processed;
     private Point L;
 
     public FortuneAlgorithm(int _pointCount, double _width, double _height) {
         this.voronoi = new Graph();
         this.beachline = null;
         this.events = new PriorityQueue<FortuneEvent>(_pointCount, FortuneHelpers::compareYNatural);
-        this.processed = new PriorityQueue<FortuneEvent>(_pointCount, FortuneHelpers::compareYReverse);
 
         for (int i = 0; i < _pointCount; ++i) {
             this.events.offer(new FortuneEvent(new Point(Math.random() * _width, Math.random() * _height)));
@@ -53,7 +52,7 @@ public class FortuneAlgorithm {
     /*****************************************************************************/
 
     /**Pre: L must be set.
-     * post: beach line initialized with a new leafNode for the current L event.
+     * post: beach line initialized with a new leaf for the current L event.
      *
      * Note this directly implements HandleSiteEvent(Pi) step 1 of p158 Computational
      * Geometry Algorithms Applications Berg et al.  With one exception it will
@@ -64,13 +63,67 @@ public class FortuneAlgorithm {
      */
     private boolean ifNewTree() {
         if (this.beachline == null) {
-            this.beachline = new BeachLeaf(this.L);
-
+            this.beachline = new BeachNode();
+            this.beachline.setSite(this.L);
             return true;
         }
         else {
             return false;
         }
+    }
+
+    private void insert( BeachNode _addition ) {
+        this.beachline = insertArch(this.beachline, _addition);
+    }
+
+    private BeachNode insertArch(BeachNode _root, BeachNode _addition) {
+
+        if (_root == null) {
+            _root = _addition;
+            return _root;
+        }
+
+        if ( _addition.getX(L) < _root.getX(L) ) {
+            _root.setLeft(insertArch(_root.getLeft(), _addition));
+        }
+        else {
+            _root.setRight(insertArch(_root.getRight(), _addition));
+        }
+
+        return _root;
+    }
+
+    private Optional<BeachNode> searchforArchAbove(BeachNode _root, BeachNode _q ) {
+        if (_root == null || FortuneHelpers.isQAboveParabolaPL(_q.getSite(), _root.getSite(), this.L.y())) {
+            return Optional.ofNullable(_root);
+        }
+
+        if (_root.getX(L) < _q.getX(L)) {
+            return searchforArchAbove(_root.getLeft(), _q);
+        }
+        else {
+            return searchforArchAbove(_root.getRight(), _q);
+        }
+    }
+
+    private BeachNode splitLeafForNewArch( BeachNode _oldArch, BeachNode _newArch ) {
+        BeachNode newParentBreak = new BeachNode();
+        BeachNode newChildBreak = new BeachNode();
+
+        BeachNode oldCopy = new BeachNode();
+        oldCopy.setSite(_oldArch.getSite());
+
+        newChildBreak.setLeft(_newArch);
+        newChildBreak.setRight(oldCopy);
+        newParentBreak.setLeft(_oldArch);
+        newParentBreak.setRight(newChildBreak);
+
+        return newParentBreak;
+    }
+
+    private AdjacencyList getHalfEdge(Point _v) {
+        GNode vertex = new GNode(_v);
+        return new AdjacencyList(vertex);
     }
 
 }

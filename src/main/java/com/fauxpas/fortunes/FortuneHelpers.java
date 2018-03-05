@@ -70,4 +70,8 @@ public class FortuneHelpers {
 		return new Point(  _z.x() , (_z.y() + _z.euclideanDistance(_s)) );
 	}
 
+	public static boolean isADirectlyBelowB(Point _a, Point _b) {
+		return (_a.compareX(_b) == 0 && _a.compareY(_b) == -1);
+	} 
+
 }

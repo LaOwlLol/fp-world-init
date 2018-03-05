@@ -7,7 +7,7 @@ import java.util.Optional;
 public class FortuneEvent {
 
     private Point site;
-    private BeachLeaf archLeaf;
+    private BeachNode archLeaf;
 
     /**
      * Note to construct this event as a circle event that collapses
@@ -26,7 +26,7 @@ public class FortuneEvent {
      *
      * @param _l the arch leaf associated with this circle event.
      */
-    public void setArchLeaf(BeachLeaf _l) {
+    public void setArchLeaf(BeachNode _l) {
         this.archLeaf = _l;
     }
 
@@ -53,7 +53,7 @@ public class FortuneEvent {
      *
      * @return A leaf node of the beachline collapsed but this circle event.
      */
-    public Optional<BeachLeaf> getArchRef() {
+    public Optional<BeachNode> getArchRef() {
         return Optional.ofNullable(archLeaf);
     }
 }

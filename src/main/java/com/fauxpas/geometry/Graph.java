@@ -26,6 +26,17 @@ public class Graph {
 		this.data.add(_e);
 	}
 
+	public void incoperateEdges(AdjacencyList _e) {
+		if (this.getAdjacencyList(_e.getRoot()).isPresent()) {
+			this.getAdjacencyList(_e.getRoot()).ifPresent( (adjList) -> {
+				adjList.addAdjacencies(_e);
+			});
+		}
+		else {
+			this.addVertexWithEdges(_e);
+		}
+	}
+
 	public List<GNode> getVertices() {
 		ArrayList<GNode> verticies = new ArrayList<GNode>();
 		for (AdjacencyList _e: data) {
