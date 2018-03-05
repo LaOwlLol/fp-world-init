@@ -5,11 +5,6 @@ import com.fauxpas.geometry.Point;
 import java.util.Comparator;
 
 public class FortuneHelpers {
-
-	public static final double MAX_WIDTH = 600.0;
-
-	public static final double MAX_HEIGHT = 500.0;
-
 	public static boolean areCounterClockWise(Point _a, Point _b, Point _c) {
 		return (_b.x() - _a.x())*(_c.y() -_a.y()) - (_c.x() - _a.x())*(_b.y() - _a.y()) > 0;
 	}
@@ -41,6 +36,18 @@ public class FortuneHelpers {
 		return ((_q.euclideanDistance(_p) - (_q.y() - _l) ) < 0.001);
 	}
 
+	public static int compareYNatural(FortuneEvent o1, FortuneEvent o2) {
+		return o1.getSite().compareY(o2.getSite());
+	}
+
+	public static int compareYReverse(FortuneEvent o1, FortuneEvent o2) {
+		return o2.getSite().compareY(o1.getSite());
+	}
+
+	public static int compareX(FortuneEvent o1, FortuneEvent o2) {
+		return o1.getSite().compareX(o2.getSite());
+	}
+
 	public static int compareQtoParabolaPL(Point _q, Point _p, double _l) {
 		if (!isQOnParabolaPL(_q, _p, _l)) {
 			if ( isQAboveParabolaPL(_q, _p, _l) ) {
@@ -63,11 +70,4 @@ public class FortuneHelpers {
 		return new Point(  _z.x() , (_z.y() + _z.euclideanDistance(_s)) );
 	}
 
-	public static class EventOrder implements Comparator<FortuneEvent> {
-
-		@Override
-		public int compare(FortuneEvent _e1, FortuneEvent _e2) {
-			return _e1.getSite().compareY(_e2.getSite());
-		}
-	}
 }
