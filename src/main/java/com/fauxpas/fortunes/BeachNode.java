@@ -49,8 +49,8 @@ public class BeachNode {
      *
      * @param _al edge list this breakpoint belongs on.
      */
-    public void setEndPoint(AdjacencyList _el) {
-        this.endPoint = _el;
+    public void setEndPoint(AdjacencyList _al) {
+        this.endPoint = _al;
     }
 
     /**
@@ -157,8 +157,8 @@ public class BeachNode {
      * a point q the center of a circle passing through
      * left site, right site, and event (_l) site.
      *
-     * note: to avoid degenerate cases (null pointer exception) return this.site.x()
-     * if left or right is not set.
+     * note: to avoid degenerate cases (null pointer exception) look for a child which
+     * has location.
      *
      * @param _l an event site to consider on the circle.
      *
@@ -167,13 +167,15 @@ public class BeachNode {
     public double getBreakPointX(Point _l) {
 
         //handle degenerate cases....
-        if (this.left == null || this.right == null) {
-            if (this.site == null) {
-                return _l.x();
-            }
-            else {
-                return this.site.x();
-            }
+        if (this.left == null && this.right == null) {
+            //this should hopefully never occur.
+            return _l.x();
+        }
+        else if (this.left != null && this.right == null) {
+            return this.left.getX(_l);
+        }
+        else if (this.left == null && this.right != null) {
+            return this.right.getX(_l);
         }
 
         //calculate slope of points on circle. ma = (y2-y1)/(x2-x1) mb = (y3-y2)/(x3-x2)
@@ -191,14 +193,15 @@ public class BeachNode {
 
     public double getBreakPointY(Point _l) {
 
-        //handle degenerate cases....
-        if (this.left == null || this.right == null) {
-            if (this.site == null) {
-                return _l.x();
-            }
-            else {
-                return this.site.y();
-            }
+        if (this.left == null && this.right == null) {
+            //this should hopefully never occur.
+            return _l.y();
+        }
+        else if (this.left != null && this.right == null) {
+            return this.left.getY(_l);
+        }
+        else if (this.left == null && this.right != null) {
+            return this.right.getY(_l);
         }
 
         double ma = (_l.y() - this.left.getY(_l)) / ( _l.x() - this.left.getX(_l) );

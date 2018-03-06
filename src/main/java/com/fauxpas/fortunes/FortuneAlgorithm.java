@@ -54,8 +54,8 @@ public class FortuneAlgorithm {
     /**Pre: L must be set.
      * post: beach line initialized with a new leaf for the current L event.
      *
-     * Note this directly implements HandleSiteEvent(Pi) step 1 of p158 Computational
-     * Geometry Algorithms Applications Berg et al.  With one exception it will
+     * Note this method implements HandleSiteEvent(Pi) step 1 of p158 Computational
+     * Geometry Algorithms Applications Berg et al,  with one exception it will
      * not break out of the HandleSiteEvent subrutine. Check return value when
      * calling and break out when true.
      *
@@ -94,8 +94,13 @@ public class FortuneAlgorithm {
     }
 
     private Optional<BeachNode> searchforArchAbove(BeachNode _root, BeachNode _q ) {
-        if (_root == null || FortuneHelpers.isQAboveParabolaPL(_q.getSite(), _root.getSite(), this.L.y())) {
+        if (_root == null) {
             return Optional.ofNullable(_root);
+        }
+        if (_root.isLeaf()) {
+            if (FortuneHelpers.isQAboveParabolaPL(_q.getSite(), _root.getSite(), this.L.y())) {
+                return Optional.ofNullable(_root);
+            }
         }
 
         if (_root.getX(L) < _q.getX(L)) {
