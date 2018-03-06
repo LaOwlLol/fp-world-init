@@ -120,15 +120,17 @@ public class FortuneAlgorithm {
 
         newChildBreak.setLeft(_newArch);
         newChildBreak.setRight(oldCopy);
+        newChildBreak.setFutureEdge(this.getHalfEdge());
         newParentBreak.setLeft(_oldArch);
         newParentBreak.setRight(newChildBreak);
+        newParentBreak.setFutureEdge(this.getHalfEdge());
 
         return newParentBreak;
     }
 
-    private AdjacencyList getHalfEdge(Point _v) {
-        GNode vertex = new GNode(_v);
-        return new AdjacencyList(vertex);
+    private AdjacencyList getHalfEdge() {
+        //GNode vertex = new GNode(_v);
+        return new AdjacencyList();
     }
 
 }

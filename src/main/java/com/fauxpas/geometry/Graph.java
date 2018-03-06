@@ -18,22 +18,34 @@ public class Graph {
 		}		
 	}
 
+	public void addEdge(GNode _root, GNode _v) {
+		this.addHalfEdge(_root, _v);
+		this.addHalfEdge(_v, _root);
+	}
+
 	public void addHalfEdge(GNode _root, GNode _v) {
-		ifHasAdjListAddNode(_root, _v);
+		if (!whenHasAdjListAddNode(_root, _v)) {
+			this.addVertex(_root);
+			this.whenHasAdjListAddNode(_root, _v);
+		}
 	}
 
 	public void addVertexWithEdges(AdjacencyList _e) {
-		this.data.add(_e);
+		if (_e.hasRoot()) {
+			this.data.add(_e);
+		}
 	}
 
 	public void incoperateEdges(AdjacencyList _e) {
-		if (this.getAdjacencyList(_e.getRoot()).isPresent()) {
-			this.getAdjacencyList(_e.getRoot()).ifPresent( (adjList) -> {
-				adjList.addAdjacencies(_e);
-			});
-		}
-		else {
-			this.addVertexWithEdges(_e);
+		if (_e.hasRoot()) {
+			if (this.getAdjacencyList(_e.getRoot()).isPresent()) {
+				this.getAdjacencyList(_e.getRoot()).ifPresent( (adjList) -> {
+					adjList.addAdjacencies(_e);
+				});
+			}
+			else {
+				this.addVertexWithEdges(_e);
+			}
 		}
 	}
 
@@ -60,10 +72,12 @@ public class Graph {
 		return edgesList;
 	}
 
-	private void ifHasAdjListAddNode(GNode _root, GNode _v) {
+	private boolean whenHasAdjListAddNode(GNode _root, GNode _v) {
 		getAdjacencyList(_root).ifPresent( (el) -> {
 			el.addAdjacency(_v);
 		});
+
+		return getAdjacencyList(_root).isPresent();
 	}
 
 	private Optional<AdjacencyList> getAdjacencyList(GNode _root) {

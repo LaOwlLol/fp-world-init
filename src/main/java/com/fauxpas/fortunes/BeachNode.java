@@ -14,14 +14,14 @@ public class BeachNode {
     private BeachNode right;
 
     private FortuneEvent circleEvent;
-    private AdjacencyList endPoint;
+    private AdjacencyList futureEdge;
 
     public BeachNode() {
     	this.site = null;
     	this.left = null;
     	this.right = null;
     	this.circleEvent = null;
-    	this.endPoint = null;
+    	this.futureEdge = null;
     }
 
     public void setSite(Point _s) {
@@ -49,8 +49,8 @@ public class BeachNode {
      *
      * @param _al edge list this breakpoint belongs on.
      */
-    public void setEndPoint(AdjacencyList _al) {
-        this.endPoint = _al;
+    public void setFutureEdge(AdjacencyList _al) {
+        this.futureEdge = _al;
     }
 
     /**
@@ -100,16 +100,16 @@ public class BeachNode {
     }
 
     /**
-     * Get the end point on the opposite side of the end being traced by this endPoint.
+     * Get the end point on the opposite side of the end being traced by this futureEdge.
      *
      * Note: This may be null only becuase this BeachNode may be a leaf and not a break point.
-     * Note: All breakpoints should return a endPoint. 
+     * Note: All breakpoints should return a futureEdge. 
      * Note: The return value is not a half edge and should be used to retrive and edge from the voronoi graph object.
      *
      * @return a vertex of the voronoi graph on the opposite end of this breakpoints traced edge.
      */
-    public Optional<AdjacencyList> getEndPoint() {
-    	return Optional.ofNullable(this.endPoint);
+    public Optional<AdjacencyList> getFutureEdge() {
+    	return Optional.ofNullable(this.futureEdge);
     }
 
     /**

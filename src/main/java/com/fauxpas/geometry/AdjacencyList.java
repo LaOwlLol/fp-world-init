@@ -8,6 +8,11 @@ public class AdjacencyList {
     private GNode root;
     private List<GNode> adjacentNodes;
 
+    public AdjacencyList() {
+        this.root = null;
+        this.adjacentNodes = new ArrayList<GNode>();
+    }
+
     public AdjacencyList(GNode _v) {
         this.root = _v;
         this.adjacentNodes = new ArrayList<GNode>();
@@ -21,6 +26,10 @@ public class AdjacencyList {
 
     public boolean isAdjacent(GNode _toNode) {
         return this.adjacentNodes.contains(_toNode);
+    }
+
+    public boolean hasRoot() {
+        return root != null;
     }
 
     public boolean isRoot(GNode _v) {
