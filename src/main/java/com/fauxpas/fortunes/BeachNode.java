@@ -103,8 +103,7 @@ public class BeachNode {
      * Get the end point on the opposite side of the end being traced by this futureEdge.
      *
      * Note: This may be null only becuase this BeachNode may be a leaf and not a break point.
-     * Note: All breakpoints should return a futureEdge. 
-     * Note: The return value is not a half edge and should be used to retrive and edge from the voronoi graph object.
+     * Note: All breakpoints should return a futureEdge.
      *
      * @return a vertex of the voronoi graph on the opposite end of this breakpoints traced edge.
      */
@@ -150,6 +149,15 @@ public class BeachNode {
 
     public double getLeafY() {
         return this.getSite().y();
+    }
+
+    public Optional<Point> getBreakPoint(Point _l) {
+        if (!isLeaf()) {
+            return Optional.of(new Point(this.getBreakPointX(_l), this.getBreakPointY(_l)));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     /**

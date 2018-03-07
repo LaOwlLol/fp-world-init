@@ -120,10 +120,15 @@ public class FortuneAlgorithm {
 
         newChildBreak.setLeft(_newArch);
         newChildBreak.setRight(oldCopy);
+        newChildBreak.setSite(_oldArch.getSite());
         newChildBreak.setFutureEdge(this.getHalfEdge());
         newParentBreak.setLeft(_oldArch);
         newParentBreak.setRight(newChildBreak);
+        newParentBreak.setSite(_newArch.getSite());
         newParentBreak.setFutureEdge(this.getHalfEdge());
+
+        checkForCircleEvent(newParentBreak);
+        checkForCircleEvent(newChildBreak);
 
         return newParentBreak;
     }
@@ -131,6 +136,34 @@ public class FortuneAlgorithm {
     private AdjacencyList getHalfEdge() {
         //GNode vertex = new GNode(_v);
         return new AdjacencyList();
+    }
+
+    private boolean checkForCircleEvent(BeachNode _p) {
+        if (_p.isLeaf()) {
+            return false;
+        }
+        if (_p.getLeft().getSite().effectivelyEqual(_p.getRight().getSite(), 0.01)) {
+            return false;
+        }
+        Optional<Point> s = _p.getBreakPoint(L);
+        if (!s.isPresent()) {
+            return false;
+        }
+        else {
+            if ( s.get().y() + s.get().euclideanDistance(_p.getSite()) < L.y() ) {
+
+                FortuneEvent ce = new FortuneEvent( new Point (s.get().x(),
+                        s.get().y() + s.get().euclideanDistance(_p.getSite())) );
+                ce.setArchLeaf(_p);
+                events.add(ce);
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
     }
 
 }
