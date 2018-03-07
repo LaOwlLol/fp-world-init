@@ -72,25 +72,72 @@ public class FortuneAlgorithm {
         }
     }
 
-    private void insert( BeachNode _addition ) {
-        this.beachline = insertArch(this.beachline, _addition);
+    private void insertBeachArch( BeachNode _b ) {
+        this.beachline = insertArch(this.beachline, _b);
     }
 
-    private BeachNode insertArch(BeachNode _root, BeachNode _addition) {
+    private BeachNode insertArch(BeachNode _root, BeachNode _b) {
 
         if (_root == null) {
-            _root = _addition;
+            _root = _b;
             return _root;
         }
 
-        if ( _addition.getX(L) < _root.getX(L) ) {
-            _root.setLeft(insertArch(_root.getLeft(), _addition));
+        if ( _b.getX(L) < _root.getX(L) ) {
+            _root.setLeft(insertArch(_root.getLeft(), _b));
         }
         else {
-            _root.setRight(insertArch(_root.getRight(), _addition));
+            _root.setRight(insertArch(_root.getRight(), _b));
         }
 
         return _root;
+    }
+
+    private void removeBeachArch( BeachNode _b) {
+        this.beachline = removeArch(this.beachline, _b);
+    }
+
+    private BeachNode removeArch(BeachNode _root, BeachNode _b) {
+        if (_root == null) {
+            return null;
+        }
+        if (_root.isLeaf()) {
+            //is this the arch to delete?
+            if (_root.getSite().effectivelyEqual(_b.getSite(), 0.01)) {
+                //remove circle event if it has one.
+                removeCircleEvent(_root);
+                return null;
+            }
+            return _root;
+        }
+        else {
+            //then it's a breakpoint or parent node.
+            if (_root.getLeft() == null || _root.getRight() == null) {
+                //i think this is a degenerate case..
+                // all non leafs should have both left and right set
+                System.out.println("degenerate bug. on remove non leaf has left or right null...");
+                System.out.println(" returning this node un modified for now.");
+                return _root;
+            }
+            // simple case left and right are not breakpoints
+            //follow normal BST procedure searching on x values.
+            if (_root.getSite().compareX(_b.getSite()) < 0) {
+                _root.setLeft(removeArch(_root.getLeft(), _b));
+                //if we delete the left branch return the right.
+                if (_root.getLeft() == null) {
+                    return _root.getRight();
+                }
+                return _root;
+             }
+             else {
+                _root.setRight(removeArch(_root.getRight(), _b));
+                //if we delete the left branch return the right.
+                if (_root.getRight() == null) {
+                    return _root.getLeft();
+                }
+                return _root;
+            }
+        }
     }
 
     private Optional<BeachNode> searchforArchAbove(BeachNode _root, BeachNode _q ) {
@@ -139,6 +186,9 @@ public class FortuneAlgorithm {
     }
 
     private boolean checkForCircleEvent(BeachNode _p) {
+        if (_p == null) {
+            return false;
+        }
         if (_p.isLeaf()) {
             return false;
         }
@@ -155,6 +205,7 @@ public class FortuneAlgorithm {
                 FortuneEvent ce = new FortuneEvent( new Point (s.get().x(),
                         s.get().y() + s.get().euclideanDistance(_p.getSite())) );
                 ce.setArchLeaf(_p);
+                _p.setCircleEvent(ce);
                 events.add(ce);
 
                 return true;
@@ -164,6 +215,15 @@ public class FortuneAlgorithm {
             }
         }
 
+    }
+
+    private void removeCircleEvent(BeachNode _b) {
+        if (!_b.isLeaf()) {
+            return;
+        }
+        _b.getCircle().ifPresent((ce) -> {
+            events.remove(ce);
+        });
     }
 
 }
