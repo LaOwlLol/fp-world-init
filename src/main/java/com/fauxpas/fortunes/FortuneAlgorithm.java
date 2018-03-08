@@ -13,18 +13,22 @@ import java.util.PriorityQueue;
 public class FortuneAlgorithm {
 
     private Graph voronoi;
+    private Graph sites;
     private BeachNode beachline;
     private PriorityQueue<FortuneEvent> events;
-    private Point L;
+    private FortuneEvent L;
 
     public FortuneAlgorithm(int _pointCount, double _width, double _height) {
         this.voronoi = new Graph();
+        this.sites = new Graph();
         this.beachline = null;
         this.events = new PriorityQueue<FortuneEvent>(_pointCount, FortuneHelpers::compareYNatural);
 
         for (int i = 0; i < _pointCount; ++i) {
             this.events.offer(new FortuneEvent(new Point(Math.random() * _width, Math.random() * _height)));
         }
+
+        processGraph();
     }
 
     public void printEvents() {
@@ -36,6 +40,10 @@ public class FortuneAlgorithm {
             FortuneEvent e = copy.poll();
             System.out.println(e.getSite().x()+", "+e.getSite().y());
         }
+    }
+
+    public List<GNode> getSites() {
+        return this.sites.getVertices();
     }
 
     public List<GNode> getVertices() {
@@ -51,24 +59,25 @@ public class FortuneAlgorithm {
     /*                                Tree Methods                               */
     /*****************************************************************************/
 
-    /**Pre: L must be set.
-     * post: beach line initialized with a new leaf for the current L event.
-     *
-     * Note this method implements HandleSiteEvent(Pi) step 1 of p158 Computational
-     * Geometry Algorithms Applications Berg et al,  with one exception it will
-     * not break out of the HandleSiteEvent subrutine. Check return value when
-     * calling and break out when true.
-     *
-     * @return whether a new tree was created with the current L point.
-     */
-    private boolean ifNewTree() {
-        if (this.beachline == null) {
-            this.beachline = new BeachNode();
-            this.beachline.setSite(this.L);
-            return true;
-        }
-        else {
-            return false;
+    private void processGraph() {
+        while (!events.isEmpty()) {
+            L = events.poll();
+            sites.addVertex(new GNode(L.getSite()));
+            if (L.getArchRef().isPresent()) {
+                removeBeachArch(L.getSite());
+            }
+            else {
+
+                BeachNode _b = new BeachNode();
+                _b.setSite(L.getSite());
+
+                if (this.beachline == null) {
+                    this.beachline = _b;
+                }
+                else {
+                    insertBeachArch(_b);
+                }
+            }
         }
     }
 
@@ -78,32 +87,44 @@ public class FortuneAlgorithm {
 
     private BeachNode insertArch(BeachNode _root, BeachNode _b) {
 
-        if (_root == null) {
-            _root = _b;
+        if (isArchAbove(_root, _b, L.getSite().y())) {
+            _root = splitLeafForNewArch(_root, _b);
             return _root;
         }
 
-        if ( _b.getX(L) < _root.getX(L) ) {
-            _root.setLeft(insertArch(_root.getLeft(), _b));
+        if (_b.getX(L.getSite()) < _root.getX(L.getSite())) {
+            if (_root.getLeft() != null) {
+                _root.setLeft(insertArch(_root.getLeft(), _b));
+            }
+            else {
+                _root = splitLeafForNewArch(_root, _b);
+                return _root;
+            }
+        } else {
+            if (_root.getRight() != null) {
+                _root.setRight(insertArch(_root.getRight(), _b));
+            }
+            else {
+                _root = splitLeafForNewArch(_root, _b);
+                return _root;
+            }
         }
-        else {
-            _root.setRight(insertArch(_root.getRight(), _b));
-        }
+
 
         return _root;
     }
 
-    private void removeBeachArch( BeachNode _b) {
+    private void removeBeachArch( Point _b) {
         this.beachline = removeArch(this.beachline, _b);
     }
 
-    private BeachNode removeArch(BeachNode _root, BeachNode _b) {
+    private BeachNode removeArch(BeachNode _root, Point _b) {
         if (_root == null) {
             return null;
         }
         if (_root.isLeaf()) {
             //is this the arch to delete?
-            if (_root.getSite().effectivelyEqual(_b.getSite(), 0.01)) {
+            if (_root.getSite().effectivelyEqual(_b, 0.01)) {
                 //remove circle event if it has one.
                 removeCircleEvent(_root);
                 return null;
@@ -121,7 +142,7 @@ public class FortuneAlgorithm {
             }
             // simple case left and right are not breakpoints
             //follow normal BST procedure searching on x values.
-            if (_root.getSite().compareX(_b.getSite()) < 0) {
+            if (_root.getSite().compareX(_b) < 0) {
                 _root.setLeft(removeArch(_root.getLeft(), _b));
                 //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
@@ -142,22 +163,18 @@ public class FortuneAlgorithm {
         }
     }
 
-    private Optional<BeachNode> searchforArchAbove(BeachNode _root, BeachNode _q ) {
+    private boolean isArchAbove(BeachNode _root, BeachNode _q, double _l ) {
         if (_root == null) {
-            return Optional.ofNullable(_root);
+           return false;
         }
-        if (_root.isLeaf()) {
-            if (FortuneHelpers.isQAboveParabolaPL(_q.getSite(), _root.getSite(), this.L.y())) {
-                return Optional.ofNullable(_root);
-            }
+        if (!_root.isLeaf()) {
+            return false;
+        }
+        if (FortuneHelpers.isQAboveParabolaPL(_q.getSite(), _root.getSite(), _l)) {
+            return true;
         }
 
-        if (_root.getX(L) < _q.getX(L)) {
-            return searchforArchAbove(_root.getLeft(), _q);
-        }
-        else {
-            return searchforArchAbove(_root.getRight(), _q);
-        }
+        return false;
     }
 
     private BeachNode splitLeafForNewArch( BeachNode _oldArch, BeachNode _newArch ) {
@@ -197,12 +214,12 @@ public class FortuneAlgorithm {
         if (_p.getLeft().getSite().effectivelyEqual(_p.getRight().getSite(), 0.01)) {
             return false;
         }
-        Optional<Point> s = _p.getBreakPoint(L);
+        Optional<Point> s = _p.getBreakPoint(L.getSite());
         if (!s.isPresent()) {
             return false;
         }
         else {
-            if ( s.get().y() + s.get().euclideanDistance(_p.getSite()) < L.y() ) {
+            if ( s.get().y() + s.get().euclideanDistance(_p.getSite()) < L.getSite().y() ) {
 
                 FortuneEvent ce = new FortuneEvent( new Point (s.get().x(),
                         s.get().y() + s.get().euclideanDistance(_p.getSite())) );

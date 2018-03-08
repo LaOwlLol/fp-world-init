@@ -41,7 +41,7 @@ public class Voronoi extends Application {
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         this.fa.printEvents();
-        //drawGraph(gc);
+        drawGraph(gc);
         root.getChildren().add(canvas);
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
@@ -53,6 +53,13 @@ public class Voronoi extends Application {
     }
 
     public void drawVertices(GraphicsContext gc) {
+        for (GNode _v: this.fa.getSites()) {
+            gc.fillOval(_v.location().x()-(this.pointRadius/2),
+                    _v.location().y()-(this.pointRadius/2),
+                    this.pointRadius,
+                    this.pointRadius);
+        }
+
         for (GNode _v: this.fa.getVertices()) {
             gc.fillOval(_v.location().x()-(this.pointRadius/2),
                     _v.location().y()-(this.pointRadius/2),
