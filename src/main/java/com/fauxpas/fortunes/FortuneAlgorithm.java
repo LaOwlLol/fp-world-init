@@ -123,16 +123,18 @@ public class FortuneAlgorithm {
             //follow normal BST procedure searching on x values.
             if (_root.getSite().compareX(_b.getSite()) < 0) {
                 _root.setLeft(removeArch(_root.getLeft(), _b));
-                //if we delete the left branch return the right.
+                //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
+                    removeCircleEvent(_root.getRight());
                     return _root.getRight();
                 }
                 return _root;
              }
              else {
                 _root.setRight(removeArch(_root.getRight(), _b));
-                //if we delete the left branch return the right.
+                //if we delete the right branch we delete the circle event on left branch and return it.
                 if (_root.getRight() == null) {
+                    removeCircleEvent(_root.getLeft());
                     return _root.getLeft();
                 }
                 return _root;
@@ -218,11 +220,16 @@ public class FortuneAlgorithm {
     }
 
     private void removeCircleEvent(BeachNode _b) {
+        if (_b == null) {
+            return;
+        }
+
         if (!_b.isLeaf()) {
             return;
         }
         _b.getCircle().ifPresent((ce) -> {
             events.remove(ce);
+            _b.setCircleEvent(null);
         });
     }
 
