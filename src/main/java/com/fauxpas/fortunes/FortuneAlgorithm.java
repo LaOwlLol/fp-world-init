@@ -92,7 +92,7 @@ public class FortuneAlgorithm {
             return _root;
         }
 
-        if (_b.getX(L.getSite()) < _root.getX(L.getSite())) {
+        if (_b.getSite().x() < _root.getSite().x()) {
             if (_root.getLeft() != null) {
                 _root.setLeft(insertArch(_root.getLeft(), _b));
             }
@@ -147,6 +147,10 @@ public class FortuneAlgorithm {
                 //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
                     removeCircleEvent(_root.getRight());
+                    _root.getFutureEdge().ifPresent( (e) -> {
+                        e.addAdjacency(new GNode(_root.getSite()));
+                        voronoi.incoperateEdges(e);
+                    });
                     return _root.getRight();
                 }
                 return _root;
@@ -156,6 +160,10 @@ public class FortuneAlgorithm {
                 //if we delete the right branch we delete the circle event on left branch and return it.
                 if (_root.getRight() == null) {
                     removeCircleEvent(_root.getLeft());
+                    _root.getFutureEdge().ifPresent( (e) -> {
+                        e.addAdjacency(new GNode(_root.getSite()));
+                        voronoi.incoperateEdges(e);
+                    });
                     return _root.getLeft();
                 }
                 return _root;
@@ -186,12 +194,13 @@ public class FortuneAlgorithm {
 
         newChildBreak.setLeft(_newArch);
         newChildBreak.setRight(oldCopy);
-        newChildBreak.setSite(_oldArch.getSite());
-        newChildBreak.setFutureEdge(this.getHalfEdge());
+
+        newChildBreak.setSite(newChildBreak.getBreakPoint(L.getSite()));
+        newChildBreak.setFutureEdge(this.getNewEdge( FortuneHelpers.getUnitVectorBetween(_newArch.getSite(), oldCopy.getSite()) ));
         newParentBreak.setLeft(_oldArch);
         newParentBreak.setRight(newChildBreak);
-        newParentBreak.setSite(_newArch.getSite());
-        newParentBreak.setFutureEdge(this.getHalfEdge());
+        newParentBreak.setSite(newParentBreak.getBreakPoint(L.getSite()));
+        newParentBreak.setFutureEdge(this.getNewEdge( FortuneHelpers.getUnitVectorBetween(oldCopy.getSite(), _newArch.getSite()) ));
 
         checkForCircleEvent(newParentBreak);
         checkForCircleEvent(newChildBreak);
@@ -199,9 +208,11 @@ public class FortuneAlgorithm {
         return newParentBreak;
     }
 
-    private AdjacencyList getHalfEdge() {
-        //GNode vertex = new GNode(_v);
-        return new AdjacencyList();
+    private AdjacencyList getNewEdge(Point _v) {
+        GNode vertex = new GNode(_v);
+        AdjacencyList edges = new AdjacencyList(vertex);
+        voronoi.addVertexWithEdges(edges);
+        return edges;
     }
 
     private boolean checkForCircleEvent(BeachNode _p) {
@@ -214,15 +225,15 @@ public class FortuneAlgorithm {
         if (_p.getLeft().getSite().effectivelyEqual(_p.getRight().getSite(), 0.01)) {
             return false;
         }
-        Optional<Point> s = _p.getBreakPoint(L.getSite());
-        if (!s.isPresent()) {
+        if (_p.isLeaf()) {
             return false;
         }
         else {
-            if ( s.get().y() + s.get().euclideanDistance(_p.getSite()) < L.getSite().y() ) {
+            Point s = _p.getBreakPoint(L.getSite());
+            if ( s.y() + s.euclideanDistance(_p.getSite()) < L.getSite().y() ) {
 
-                FortuneEvent ce = new FortuneEvent( new Point (s.get().x(),
-                        s.get().y() + s.get().euclideanDistance(_p.getSite())) );
+                FortuneEvent ce = new FortuneEvent( new Point (s.x(),
+                        s.y() + s.euclideanDistance(_p.getSite())) );
                 ce.setArchLeaf(_p);
                 _p.setCircleEvent(ce);
                 events.add(ce);

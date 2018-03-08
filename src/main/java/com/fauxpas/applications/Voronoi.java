@@ -9,6 +9,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public class Voronoi extends Application {
         Group root = new Group();
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        this.fa.printEvents();
+        //this.fa.printEvents();
         drawGraph(gc);
         root.getChildren().add(canvas);
         primaryStage.setScene(new Scene(root));
@@ -53,13 +54,14 @@ public class Voronoi extends Application {
     }
 
     public void drawVertices(GraphicsContext gc) {
+        gc.setFill(Color.BLUE);
         for (GNode _v: this.fa.getSites()) {
             gc.fillOval(_v.location().x()-(this.pointRadius/2),
                     _v.location().y()-(this.pointRadius/2),
                     this.pointRadius,
                     this.pointRadius);
         }
-
+        gc.setFill(Color.BLACK);
         for (GNode _v: this.fa.getVertices()) {
             gc.fillOval(_v.location().x()-(this.pointRadius/2),
                     _v.location().y()-(this.pointRadius/2),

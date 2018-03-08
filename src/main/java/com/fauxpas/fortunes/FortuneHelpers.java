@@ -72,6 +72,11 @@ public class FortuneHelpers {
 
 	public static boolean isADirectlyBelowB(Point _a, Point _b) {
 		return (_a.compareX(_b) == 0 && _a.compareY(_b) == -1);
-	} 
+	}
+
+	public static Point getUnitVectorBetween(Point _a, Point _b) {
+		return new Point( _a.x() + ((_a.x() - _b.x())/2),  _a.y()+ ((_a.y() - _b.y())/2)  );
+		
+	}
 
 }

@@ -120,43 +120,12 @@ public class BeachNode {
     	return (this.left == null) && (this.right == null);
     }
 
-    public double getX(Point _l) {
-    	if (this.isLeaf()) {
-    		return this.getLeafX();
-    	}
-    	else {
-    		return this.getBreakPointX(_l);
-    	}
-    }
-
-    public double getY(Point _l) {
-        if (this.isLeaf()) {
-            return this.getLeafY();
-        }
-        else {
-            return this.getBreakPointY(_l);
-        }
-    }
-
-    /**
-     * Get the x Location of the site for this leaf (arch) in the beachline.
-     *
-     * @return X Location of the site generating this arch of the beach line.
-     */
-    public double getLeafX() {
-        return this.getSite().x();
-    }
-
-    public double getLeafY() {
-        return this.getSite().y();
-    }
-
-    public Optional<Point> getBreakPoint(Point _l) {
+    public Point getBreakPoint(Point _l) {
         if (!isLeaf()) {
-            return Optional.of(new Point(this.getBreakPointX(_l), this.getBreakPointY(_l)));
+            return new Point(this.getBreakPointX(_l), this.getBreakPointY(_l));
         }
         else {
-            return Optional.empty();
+            return this.site;
         }
     }
 
@@ -180,20 +149,20 @@ public class BeachNode {
             return _l.x();
         }
         else if (this.left != null && this.right == null) {
-            return this.left.getX(_l);
+            return this.left.getSite().x();
         }
         else if (this.left == null && this.right != null) {
-            return this.right.getX(_l);
+            return this.right.getSite().x();
         }
 
         //calculate slope of points on circle. ma = (y2-y1)/(x2-x1) mb = (y3-y2)/(x3-x2)
-        double ma = (_l.y() - this.left.getY(_l)) / ( _l.x() - this.left.getX(_l) );
-        double mb = (this.right.getY(_l) - _l.y() ) / (this.right.getX(_l) - _l.x() );
+        double ma = (_l.y() - this.left.getSite().y()) / ( _l.x() - this.left.getSite().x() );
+        double mb = (this.right.getSite().y() - _l.y() ) / (this.right.getSite().x() - _l.x() );
 
         //calculate numerator of the x coordinates from perpendiculars to ma and mb
-        double numerator = ma*mb*(this.left.getY(_l) - this.right.getY(_l)) +
-                mb * (this.left.getX(_l) + _l.x()) -
-                ma*( _l.x() + this.right.getX(_l) );
+        double numerator = ma*mb*(this.left.getSite().y() - this.right.getSite().y()) +
+                mb * (this.left.getSite().x() + _l.x()) -
+                ma*( _l.x() + this.right.getSite().x() );
 
         // return x location of the circle.
         return numerator / (2* (mb - ma));
@@ -206,14 +175,14 @@ public class BeachNode {
             return _l.y();
         }
         else if (this.left != null && this.right == null) {
-            return this.left.getY(_l);
+            return this.left.getSite().y();
         }
         else if (this.left == null && this.right != null) {
-            return this.right.getY(_l);
+            return this.right.getSite().y();
         }
 
-        double ma = (_l.y() - this.left.getY(_l)) / ( _l.x() - this.left.getX(_l) );
-        return (-1 / ma) * (this.getBreakPointX(_l) - (this.left.getX(_l) + _l.x()) * 0.5) + (this.left.getY(_l) + _l.y()) * 0.5;
+        double ma = (_l.y() - this.left.getSite().y()) / ( _l.x() - this.left.getSite().x() );
+        return (-1 / ma) * (this.getBreakPointX(_l) - (this.left.getSite().x() + _l.x()) * 0.5) + (this.left.getSite().y() + _l.y()) * 0.5;
     }
 
 }
