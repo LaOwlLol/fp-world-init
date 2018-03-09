@@ -47,7 +47,7 @@ public class BeachNode {
     /**
      * Set the edge list this breakpoint will belong on.
      *
-     * @param _al edge list this breakpoint belongs on.
+     * @param _v edge list this breakpoint belongs on.
      */
     public void setEdgeEnd(GNode _v) {
         this.edgeEnd = _v;
@@ -118,71 +118,6 @@ public class BeachNode {
      */
     public boolean isLeaf() {
     	return (this.left == null) && (this.right == null);
-    }
-
-    public Point getBreakPoint(Point _l) {
-        if (!isLeaf()) {
-            return new Point(this.getBreakPointX(_l), this.getBreakPointY(_l));
-        }
-        else {
-            return this.site;
-        }
-    }
-
-    /**
-     * Get the x location of the breakpoint which is at
-     * a point q the center of a circle passing through
-     * left site, right site, and event (_l) site.
-     *
-     * note: to avoid degenerate cases (null pointer exception) look for a child which
-     * has location.
-     *
-     * @param _l an event site to consider on the circle.
-     *
-     * @return x coordinate of the circle passing through left, right, and event sites.
-     */
-    public double getBreakPointX(Point _l) {
-
-        //handle degenerate cases....
-        if (this.isLeaf()) {
-            //this should hopefully never occur.
-            return this.site.x();
-        }
-        else if (this.left != null && this.right == null) {
-            return this.left.getSite().x();
-        }
-        else if (this.left == null && this.right != null) {
-            return this.right.getSite().x();
-        }
-
-        //calculate slope of points on circle. ma = (y2-y1)/(x2-x1) mb = (y3-y2)/(x3-x2)
-        double ma = (_l.y() - this.left.getSite().y()) / ( _l.x() - this.left.getSite().x() );
-        double mb = (this.right.getSite().y() - _l.y() ) / (this.right.getSite().x() - _l.x() );
-
-        //calculate numerator of the x coordinates from perpendiculars to ma and mb
-        double numerator = ma*mb*(this.left.getSite().y() - this.right.getSite().y()) +
-                mb * (this.left.getSite().x() + _l.x()) -
-                ma*( _l.x() + this.right.getSite().x() );
-
-        // return x location of the circle.
-        return numerator / (2* (mb - ma));
-    }
-
-    public double getBreakPointY(Point _l) {
-
-        if (this.isLeaf()) {
-            //this should hopefully never occur.
-            return _l.y();
-        }
-        else if (this.left != null && this.right == null) {
-            return this.left.getSite().y();
-        }
-        else if (this.left == null && this.right != null) {
-            return this.right.getSite().y();
-        }
-
-        double ma = (_l.y() - this.left.getSite().y()) / ( _l.x() - this.left.getSite().x() );
-        return (-1 / ma) * (this.getBreakPointX(_l) - (this.left.getSite().x() + _l.x()) * 0.5) + (this.left.getSite().y() + _l.y()) * 0.5;
     }
 
 }

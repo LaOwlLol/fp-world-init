@@ -1,5 +1,6 @@
 package com.fauxpas.fortunes;
 
+import com.fauxpas.applications.Voronoi;
 import com.fauxpas.geometry.GNode;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.Point;
@@ -85,10 +86,13 @@ public class FortuneAlgorithm {
         this.beachline = insertArch(this.beachline, _b);
     }
 
-    private BeachNode insertArch(BeachNode _root, BeachNode _b) {
+    private void removeBeachArch( Point _b) {
+        this.beachline = removeArch(this.beachline, _b);
+    }
 
+    private BeachNode insertArch(BeachNode _root, BeachNode _b) {
         if (isArchAbove(_root, _b, L.getSite().y())) {
-            _root = splitLeafForNewArch(_root, _b);
+            _root = splitArch(_root, _b);
             return _root;
         }
 
@@ -97,7 +101,7 @@ public class FortuneAlgorithm {
                 _root.setLeft(insertArch(_root.getLeft(), _b));
             }
             else {
-                _root = splitLeafForNewArch(_root, _b);
+                _root = splitArch(_root, _b);
                 return _root;
             }
         } else {
@@ -105,17 +109,13 @@ public class FortuneAlgorithm {
                 _root.setRight(insertArch(_root.getRight(), _b));
             }
             else {
-                _root = splitLeafForNewArch(_root, _b);
+                _root = splitArch(_root, _b);
                 return _root;
             }
         }
 
 
         return _root;
-    }
-
-    private void removeBeachArch( Point _b) {
-        this.beachline = removeArch(this.beachline, _b);
     }
 
     private BeachNode removeArch(BeachNode _root, Point _b) {
@@ -147,29 +147,17 @@ public class FortuneAlgorithm {
                 //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
                     removeCircleEvent(_root.getRight());
-                    if (_root.getEdgeEnd() != null) {
-                        voronoi.addEdge(_root.getEdgeEnd(), new GNode(_root.getBreakPoint(L.getSite())));
-                        System.out.println("Edge added.");
-                    }
-                    else {
-                        System.out.println("Collapsing edgeEnd was null.");
-                    }
+                    finishVoronoiEdgeWithVertex(_root, L.getSite());
                     return _root.getRight();
                 }
                 return _root;
-             }
-             else {
+            }
+            else {
                 _root.setRight(removeArch(_root.getRight(), _b));
                 //if we delete the right branch we delete the circle event on left branch and return it.
                 if (_root.getRight() == null) {
                     removeCircleEvent(_root.getLeft());
-                    if (_root.getEdgeEnd() != null) {
-                        voronoi.addEdge(_root.getEdgeEnd(), new GNode(_root.getBreakPoint(L.getSite())));
-                        System.out.println("Edge added.");
-                    }
-                    else {
-                        System.out.println("Collapsing edgeEnd was null.");
-                    }
+                    finishVoronoiEdgeWithVertex(_root, L.getSite());
                     return _root.getLeft();
                 }
                 return _root;
@@ -181,9 +169,6 @@ public class FortuneAlgorithm {
         if (_root == null) {
            return false;
         }
-        if (!_root.isLeaf()) {
-            return false;
-        }
         if (FortuneHelpers.isQAboveParabolaPL(_q.getSite(), _root.getSite(), _l)) {
             return true;
         }
@@ -191,7 +176,7 @@ public class FortuneAlgorithm {
         return false;
     }
 
-    private BeachNode splitLeafForNewArch( BeachNode _oldArch, BeachNode _newArch ) {
+    private BeachNode splitArch( BeachNode _oldArch, BeachNode _newArch ) {
         BeachNode newParentBreak = new BeachNode();
         BeachNode newChildBreak = new BeachNode();
 
@@ -200,14 +185,14 @@ public class FortuneAlgorithm {
 
         newChildBreak.setLeft(_newArch);
         newChildBreak.setRight(oldCopy);
-
-        newChildBreak.setSite(newChildBreak.getBreakPoint(L.getSite()));
-        newChildBreak.setEdgeEnd(new GNode(FortuneHelpers.getUnitVectorBetween(_newArch.getSite(), oldCopy.getSite())));
+        newChildBreak.setSite(FortuneHelpers.getMidPoint(_newArch.getSite(), oldCopy.getSite()));
+        newChildBreak.setEdgeEnd(new GNode(newChildBreak.getSite()));
         voronoi.addVertex(newChildBreak.getEdgeEnd());
+
         newParentBreak.setLeft(_oldArch);
         newParentBreak.setRight(newChildBreak);
-        newParentBreak.setSite(newParentBreak.getBreakPoint(L.getSite()));
-        newParentBreak.setEdgeEnd(new GNode (FortuneHelpers.getUnitVectorBetween(oldCopy.getSite(), _newArch.getSite())));
+        newParentBreak.setSite( FortuneHelpers.getMidPoint(_oldArch.getSite(), _newArch.getSite()) );
+        newParentBreak.setEdgeEnd(new GNode(newParentBreak.getSite()));
         voronoi.addVertex(newParentBreak.getEdgeEnd());
 
         checkForCircleEvent(newParentBreak);
@@ -223,6 +208,18 @@ public class FortuneAlgorithm {
         return edges;
     }
 
+    private void finishVoronoiEdgeWithVertex(BeachNode _b, Point _l)  {
+        if (_b.getEdgeEnd() != null) {
+            voronoi.addEdge(_b.getEdgeEnd(),
+                    new GNode(FortuneHelpers.getCenterOfCircumCircle(
+                            _b.getLeft().getSite(), _b.getRight().getSite(), _l)));
+            System.out.println("Edge added.");
+        }
+        else {
+            System.out.println("Collapsing edgeEnd was null.");
+        }
+    }
+
     private boolean checkForCircleEvent(BeachNode _p) {
         if (_p == null) {
             return false;
@@ -234,7 +231,7 @@ public class FortuneAlgorithm {
             return false;
         }
         
-        Point s = _p.getBreakPoint(L.getSite());
+        Point s = FortuneHelpers.getCenterOfCircumCircle(_p.getLeft().getSite(), _p.getRight().getSite(), L.getSite());
         if ( s.y() + s.euclideanDistance(_p.getSite()) > L.getSite().y() ) {
 
             FortuneEvent ce = new FortuneEvent( new Point (s.x(),
@@ -250,7 +247,6 @@ public class FortuneAlgorithm {
         else {
             return false;
         }
-        
 
     }
 
