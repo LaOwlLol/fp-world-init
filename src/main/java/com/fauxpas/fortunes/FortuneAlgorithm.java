@@ -147,10 +147,13 @@ public class FortuneAlgorithm {
                 //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
                     removeCircleEvent(_root.getRight());
-                    _root.getFutureEdge().ifPresent( (e) -> {
-                        e.addAdjacency(new GNode(_root.getSite()));
-                        voronoi.incoperateEdges(e);
-                    });
+                    if (_root.getEdgeEnd() != null) {
+                        voronoi.addEdge(_root.getEdgeEnd(), new GNode(_root.getBreakPoint(L.getSite())));
+                        System.out.println("Edge added.");
+                    }
+                    else {
+                        System.out.println("Collapsing edgeEnd was null.");
+                    }
                     return _root.getRight();
                 }
                 return _root;
@@ -160,10 +163,13 @@ public class FortuneAlgorithm {
                 //if we delete the right branch we delete the circle event on left branch and return it.
                 if (_root.getRight() == null) {
                     removeCircleEvent(_root.getLeft());
-                    _root.getFutureEdge().ifPresent( (e) -> {
-                        e.addAdjacency(new GNode(_root.getSite()));
-                        voronoi.incoperateEdges(e);
-                    });
+                    if (_root.getEdgeEnd() != null) {
+                        voronoi.addEdge(_root.getEdgeEnd(), new GNode(_root.getBreakPoint(L.getSite())));
+                        System.out.println("Edge added.");
+                    }
+                    else {
+                        System.out.println("Collapsing edgeEnd was null.");
+                    }
                     return _root.getLeft();
                 }
                 return _root;
@@ -196,11 +202,13 @@ public class FortuneAlgorithm {
         newChildBreak.setRight(oldCopy);
 
         newChildBreak.setSite(newChildBreak.getBreakPoint(L.getSite()));
-        newChildBreak.setFutureEdge(this.getNewEdge( FortuneHelpers.getUnitVectorBetween(_newArch.getSite(), oldCopy.getSite()) ));
+        newChildBreak.setEdgeEnd(new GNode(FortuneHelpers.getUnitVectorBetween(_newArch.getSite(), oldCopy.getSite())));
+        voronoi.addVertex(newChildBreak.getEdgeEnd());
         newParentBreak.setLeft(_oldArch);
         newParentBreak.setRight(newChildBreak);
         newParentBreak.setSite(newParentBreak.getBreakPoint(L.getSite()));
-        newParentBreak.setFutureEdge(this.getNewEdge( FortuneHelpers.getUnitVectorBetween(oldCopy.getSite(), _newArch.getSite()) ));
+        newParentBreak.setEdgeEnd(new GNode (FortuneHelpers.getUnitVectorBetween(oldCopy.getSite(), _newArch.getSite())));
+        voronoi.addVertex(newParentBreak.getEdgeEnd());
 
         checkForCircleEvent(newParentBreak);
         checkForCircleEvent(newChildBreak);
@@ -225,25 +233,24 @@ public class FortuneAlgorithm {
         if (_p.getLeft().getSite().effectivelyEqual(_p.getRight().getSite(), 0.01)) {
             return false;
         }
-        if (_p.isLeaf()) {
-            return false;
+        
+        Point s = _p.getBreakPoint(L.getSite());
+        if ( s.y() + s.euclideanDistance(_p.getSite()) > L.getSite().y() ) {
+
+            FortuneEvent ce = new FortuneEvent( new Point (s.x(),
+                    s.y() + s.euclideanDistance(_p.getSite())) );
+            ce.setArchLeaf(_p);
+            _p.setCircleEvent(ce);
+            events.offer(ce);
+
+            System.out.println("Adding cirlce event.");
+
+            return true;
         }
         else {
-            Point s = _p.getBreakPoint(L.getSite());
-            if ( s.y() + s.euclideanDistance(_p.getSite()) < L.getSite().y() ) {
-
-                FortuneEvent ce = new FortuneEvent( new Point (s.x(),
-                        s.y() + s.euclideanDistance(_p.getSite())) );
-                ce.setArchLeaf(_p);
-                _p.setCircleEvent(ce);
-                events.add(ce);
-
-                return true;
-            }
-            else {
-                return false;
-            }
+            return false;
         }
+        
 
     }
 

@@ -14,14 +14,14 @@ public class BeachNode {
     private BeachNode right;
 
     private FortuneEvent circleEvent;
-    private AdjacencyList futureEdge;
+    private GNode edgeEnd;
 
     public BeachNode() {
     	this.site = null;
     	this.left = null;
     	this.right = null;
     	this.circleEvent = null;
-    	this.futureEdge = null;
+    	this.edgeEnd = null;
     }
 
     public void setSite(Point _s) {
@@ -49,8 +49,8 @@ public class BeachNode {
      *
      * @param _al edge list this breakpoint belongs on.
      */
-    public void setFutureEdge(AdjacencyList _al) {
-        this.futureEdge = _al;
+    public void setEdgeEnd(GNode _v) {
+        this.edgeEnd = _v;
     }
 
     /**
@@ -100,15 +100,15 @@ public class BeachNode {
     }
 
     /**
-     * Get the end point on the opposite side of the end being traced by this futureEdge.
+     * Get the end point on the opposite side of the end being traced by this edgeEnd.
      *
      * Note: This may be null only becuase this BeachNode may be a leaf and not a break point.
-     * Note: All breakpoints should return a futureEdge.
+     * Note: All breakpoints should return a edgeEnd.
      *
      * @return a vertex of the voronoi graph on the opposite end of this breakpoints traced edge.
      */
-    public Optional<AdjacencyList> getFutureEdge() {
-    	return Optional.ofNullable(this.futureEdge);
+    public GNode getEdgeEnd() {
+    	return this.edgeEnd;
     }
 
     /**
@@ -144,9 +144,9 @@ public class BeachNode {
     public double getBreakPointX(Point _l) {
 
         //handle degenerate cases....
-        if (this.left == null && this.right == null) {
+        if (this.isLeaf()) {
             //this should hopefully never occur.
-            return _l.x();
+            return this.site.x();
         }
         else if (this.left != null && this.right == null) {
             return this.left.getSite().x();
@@ -170,7 +170,7 @@ public class BeachNode {
 
     public double getBreakPointY(Point _l) {
 
-        if (this.left == null && this.right == null) {
+        if (this.isLeaf()) {
             //this should hopefully never occur.
             return _l.y();
         }
