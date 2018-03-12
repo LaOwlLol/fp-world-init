@@ -46,6 +46,14 @@ public class Point {
         return new Point ( this.x/this.euclideanLength() , this.y/this.euclideanLength() );
     }
 
+    public Point scaled(double n) {
+        return new Point(this.x * n, this.y *n);
+    }
+
+    public Point moved(Point _d) {
+        return new Point(this.x+_d.x(), this.y+_d.y());
+    }
+
     public double euclideanDistance(Point _other) {
         return Math.sqrt( Math.pow((this.x()-_other.x()), 2) + Math.pow((this.y()-_other.y()), 2));
     }

@@ -78,6 +78,14 @@ public class FortuneHelpers {
 		return new Point( _a.x() + ((_a.x() - _b.x())/2),  _a.y()+ ((_a.y() - _b.y())/2)  );
 	}
 
+	public static Point perpendicular(Point _a, Point _b) {
+		double dx = _b.x() - _a.x();
+		double dy = _b.y() - _a.y();
+
+		return _b.moved(new Point(-dy, dx).scaled(_a.euclideanDistance(_b)/2.0));
+	}
+
+
 	/**
 	 * Get the location of the breakpoint which is at
 	 * a point q the center of a circle passing through

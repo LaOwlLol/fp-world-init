@@ -185,13 +185,13 @@ public class FortuneAlgorithm {
 
         newChildBreak.setLeft(_newArch);
         newChildBreak.setRight(oldCopy);
-        newChildBreak.setSite(FortuneHelpers.getMidPoint(_newArch.getSite(), oldCopy.getSite()));
+        newChildBreak.setSite(FortuneHelpers.perpendicular(_newArch.getSite(), oldCopy.getSite()));
         newChildBreak.setEdgeEnd(new GNode(newChildBreak.getSite()));
         voronoi.addVertex(newChildBreak.getEdgeEnd());
 
         newParentBreak.setLeft(_oldArch);
         newParentBreak.setRight(newChildBreak);
-        newParentBreak.setSite( FortuneHelpers.getMidPoint(_oldArch.getSite(), _newArch.getSite()) );
+        newParentBreak.setSite( FortuneHelpers.perpendicular(_oldArch.getSite(), _newArch.getSite()) );
         newParentBreak.setEdgeEnd(new GNode(newParentBreak.getSite()));
         voronoi.addVertex(newParentBreak.getEdgeEnd());
 
