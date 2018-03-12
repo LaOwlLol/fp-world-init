@@ -68,6 +68,15 @@ public class Voronoi extends Application {
                     this.pointRadius,
                     this.pointRadius);
         }
+
+        gc.setFill(Color.ORANGE);
+        for (GNode _v: this.fa.getCircles()) {
+            gc.fillOval(_v.location().x()-(this.pointRadius/2),
+                    _v.location().y()-(this.pointRadius/2),
+                    this.pointRadius,
+                    this.pointRadius);
+        }
+        gc.setFill(Color.BLACK);
     }
 
     public void drawEdges(GraphicsContext gc) {

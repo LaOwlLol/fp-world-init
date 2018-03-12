@@ -15,6 +15,7 @@ public class FortuneAlgorithm {
 
     private Graph voronoi;
     private Graph sites;
+    private Graph circles;
     private BeachNode beachline;
     private PriorityQueue<FortuneEvent> events;
     private FortuneEvent L;
@@ -22,6 +23,7 @@ public class FortuneAlgorithm {
     public FortuneAlgorithm(int _pointCount, double _width, double _height) {
         this.voronoi = new Graph();
         this.sites = new Graph();
+        this.circles = new Graph();
         this.beachline = null;
         this.events = new PriorityQueue<FortuneEvent>(_pointCount, FortuneHelpers::compareYNatural);
 
@@ -45,6 +47,10 @@ public class FortuneAlgorithm {
 
     public List<GNode> getSites() {
         return this.sites.getVertices();
+    }
+
+    public List<GNode> getCircles() {
+        return this.circles.getVertices();
     }
 
     public List<GNode> getVertices() {
@@ -87,7 +93,7 @@ public class FortuneAlgorithm {
     }
 
     private void removeBeachArch( Point _b) {
-        this.beachline = removeArch(this.beachline, _b);
+        this.beachline = removeArch(null, this.beachline, _b);
     }
 
     private BeachNode insertArch(BeachNode _root, BeachNode _b) {
@@ -118,7 +124,7 @@ public class FortuneAlgorithm {
         return _root;
     }
 
-    private BeachNode removeArch(BeachNode _root, Point _b) {
+    private BeachNode removeArch(BeachNode _parent, BeachNode _root, Point _b) {
         if (_root == null) {
             return null;
         }
@@ -127,6 +133,7 @@ public class FortuneAlgorithm {
             if (_root.getSite().effectivelyEqual(_b, 0.01)) {
                 //remove circle event if it has one.
                 removeCircleEvent(_root);
+                finishVoronoiEdgeWithVertex(_parent ,_root, _b);
                 return null;
             }
             return _root;
@@ -143,21 +150,19 @@ public class FortuneAlgorithm {
             // simple case left and right are not breakpoints
             //follow normal BST procedure searching on x values.
             if (_root.getSite().compareX(_b) < 0) {
-                _root.setLeft(removeArch(_root.getLeft(), _b));
+                _root.setLeft(removeArch(_root, _root.getLeft(), _b));
                 //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
                     removeCircleEvent(_root.getRight());
-                    finishVoronoiEdgeWithVertex(_root, L.getSite());
                     return _root.getRight();
                 }
                 return _root;
             }
             else {
-                _root.setRight(removeArch(_root.getRight(), _b));
+                _root.setRight(removeArch(_root, _root.getRight(), _b));
                 //if we delete the right branch we delete the circle event on left branch and return it.
                 if (_root.getRight() == null) {
                     removeCircleEvent(_root.getLeft());
-                    finishVoronoiEdgeWithVertex(_root, L.getSite());
                     return _root.getLeft();
                 }
                 return _root;
@@ -208,8 +213,8 @@ public class FortuneAlgorithm {
         return edges;
     }
 
-    private void finishVoronoiEdgeWithVertex(BeachNode _b, Point _l)  {
-        if (_b.getEdgeEnd() != null) {
+    private void finishVoronoiEdgeWithVertex(BeachNode _parent, BeachNode _b, Point _l)  {
+        if (_parent.getEdgeEnd() != null) {
             voronoi.addEdge(_b.getEdgeEnd(),
                     new GNode(FortuneHelpers.getCenterOfCircumCircle(
                             _b.getLeft().getSite(), _b.getRight().getSite(), _l)));
@@ -239,7 +244,7 @@ public class FortuneAlgorithm {
             ce.setArchLeaf(_p);
             _p.setCircleEvent(ce);
             events.offer(ce);
-
+            circles.addVertex(new GNode(s));
             System.out.println("Adding cirlce event.");
 
             return true;
