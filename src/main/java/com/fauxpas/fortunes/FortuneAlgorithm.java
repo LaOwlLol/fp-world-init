@@ -1,14 +1,11 @@
 package com.fauxpas.fortunes;
 
-import com.fauxpas.applications.Voronoi;
 import com.fauxpas.geometry.GNode;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.Point;
 import com.fauxpas.geometry.AdjacencyList;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.PriorityQueue;
 
 public class FortuneAlgorithm {
@@ -71,10 +68,15 @@ public class FortuneAlgorithm {
             L = events.poll();
             sites.addVertex(new GNode(L.getSite()));
             if (L.getArchRef().isPresent()) {
-                removeBeachArch(L.getSite());
+
+                L.getArchRef().ifPresent( (a) -> {
+                    System.out.println("Circle event.");
+                    removeBeachArch(a.getSite());
+                } );
+
             }
             else {
-
+                System.out.println("Site event.");
                 BeachNode _b = new BeachNode();
                 _b.setSite(L.getSite());
 
@@ -243,9 +245,9 @@ public class FortuneAlgorithm {
                     s.y() + s.euclideanDistance(_p.getSite())) );
             ce.setArchLeaf(_p);
             _p.setCircleEvent(ce);
-            events.offer(ce);
+            events.add(ce);
             circles.addVertex(new GNode(s));
-            System.out.println("Adding cirlce event.");
+            //System.out.println("Adding circle event.");
 
             return true;
         }
