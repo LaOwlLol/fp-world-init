@@ -54,14 +54,14 @@ public class Voronoi extends Application {
     }
 
     public void drawVertices(GraphicsContext gc) {
-        gc.setFill(Color.BLUE);
+
         for (GNode _v: this.fa.getSites()) {
             gc.fillOval(_v.location().x()-(this.pointRadius/2),
                     _v.location().y()-(this.pointRadius/2),
                     this.pointRadius,
                     this.pointRadius);
         }
-        gc.setFill(Color.BLACK);
+        gc.setFill(Color.BLUE);
         for (GNode _v: this.fa.getVertices()) {
             gc.fillOval(_v.location().x()-(this.pointRadius/2),
                     _v.location().y()-(this.pointRadius/2),
