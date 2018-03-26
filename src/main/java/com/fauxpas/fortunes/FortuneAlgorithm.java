@@ -16,6 +16,7 @@ public class FortuneAlgorithm {
     private BeachNode beachline;
     private PriorityQueue<FortuneEvent> events;
     private FortuneEvent L;
+    private double sweep;
 
     public FortuneAlgorithm(int _pointCount, double _width, double _height) {
         this.voronoi = new Graph();
@@ -28,7 +29,7 @@ public class FortuneAlgorithm {
             this.events.offer(new FortuneEvent(new Point(Math.random() * _width, Math.random() * _height)));
         }
 
-        processGraph();
+
     }
 
     public void printEvents() {
@@ -58,32 +59,40 @@ public class FortuneAlgorithm {
         return this.voronoi.getEdges();
     }
 
+    public double getSweep() {
+        return this.sweep;
+    }
 
     /*****************************************************************************/
     /*                                Tree Methods                               */
     /*****************************************************************************/
 
-    private void processGraph() {
+    public void processGraph() {
         while (!events.isEmpty()) {
+           processNextEvent();
+        }
+    }
+
+    public void processNextEvent() {
+        if (!events.isEmpty()) {
             L = events.poll();
+            this.sweep = L.getSite().y();
             sites.addVertex(new GNode(L.getSite()));
             if (L.getArchRef().isPresent()) {
 
-                L.getArchRef().ifPresent( (a) -> {
+                L.getArchRef().ifPresent((a) -> {
                     System.out.println("Circle event.");
                     removeBeachArch(a.getSite());
-                } );
+                });
 
-            }
-            else {
+            } else {
                 System.out.println("Site event.");
                 BeachNode _b = new BeachNode();
                 _b.setSite(L.getSite());
 
                 if (this.beachline == null) {
                     this.beachline = _b;
-                }
-                else {
+                } else {
                     insertBeachArch(_b);
                 }
             }
@@ -134,8 +143,8 @@ public class FortuneAlgorithm {
             //is this the arch to delete?
             if (_root.getSite().effectivelyEqual(_b, 0.01)) {
                 //remove circle event if it has one.
-                removeCircleEvent(_root);
                 finishVoronoiEdgeWithVertex(_parent ,_root, _b);
+                removeCircleEvent(_root);
                 return null;
             }
             return _root;
@@ -267,6 +276,7 @@ public class FortuneAlgorithm {
         }
         _b.getCircle().ifPresent((ce) -> {
             events.remove(ce);
+
             _b.setCircleEvent(null);
         });
     }

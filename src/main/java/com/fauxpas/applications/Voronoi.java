@@ -4,6 +4,7 @@ import com.fauxpas.fortunes.FortuneAlgorithm;
 import com.fauxpas.geometry.GNode;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.Point;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -29,6 +30,7 @@ public class Voronoi extends Application {
 
         this.fa = new FortuneAlgorithm(50, this.width, this.height);
 
+
     }
 
     public static void main(String[] args) {
@@ -41,11 +43,29 @@ public class Voronoi extends Application {
         Group root = new Group();
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        //this.fa.printEvents();
-        drawGraph(gc);
+        //this.fa.processGraph();
+
+        AnimationTimer timer = new AnimationTimer() {
+
+            private long count = 0;
+
+            @Override
+            public void handle(long now) {
+                if (count % 100 == 0){
+                    GraphicsContext gc = canvas.getGraphicsContext2D();
+
+                    gc.clearRect(0, 0, width, height);
+                    fa.processNextEvent();
+                    drawGraph(gc);
+                }
+                count++;
+            }
+        };
+
         root.getChildren().add(canvas);
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
+        timer.start();
     }
 
     public void drawGraph(GraphicsContext gc) {
@@ -77,6 +97,8 @@ public class Voronoi extends Application {
                     this.pointRadius);
         }
         gc.setFill(Color.BLACK);
+
+        gc.strokeLine(0, this.fa.getSweep(), this.width, this.fa.getSweep());
     }
 
     public void drawEdges(GraphicsContext gc) {
