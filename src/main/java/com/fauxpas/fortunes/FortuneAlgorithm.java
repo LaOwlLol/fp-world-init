@@ -82,7 +82,8 @@ public class FortuneAlgorithm {
 
                 L.getArchRef().ifPresent((a) -> {
                     System.out.println("Circle event.");
-                    removeBeachArch(a.getSite());
+                    circles.addVertex(new GNode(a.getSite()));
+                    removeBeachArch(a);
                 });
 
             } else {
@@ -103,8 +104,8 @@ public class FortuneAlgorithm {
         this.beachline = insertArch(this.beachline, _b);
     }
 
-    private void removeBeachArch( Point _b) {
-        this.beachline = removeArch(null, this.beachline, _b);
+    private void removeBeachArch( BeachNode _b) {
+        this.beachline = removeArch(this.beachline, _b);
     }
 
     private BeachNode insertArch(BeachNode _root, BeachNode _b) {
@@ -135,33 +136,25 @@ public class FortuneAlgorithm {
         return _root;
     }
 
-    private BeachNode removeArch(BeachNode _parent, BeachNode _root, Point _b) {
+    private BeachNode removeArch(BeachNode _root, BeachNode _b) {
         if (_root == null) {
-            return null;
+            return _root;
         }
         if (_root.isLeaf()) {
-            //is this the arch to delete?
-            if (_root.getSite().effectivelyEqual(_b, 0.01)) {
-                //remove circle event if it has one.
-                finishVoronoiEdgeWithVertex(_parent ,_root, _b);
-                removeCircleEvent(_root);
-                return null;
-            }
             return _root;
         }
         else {
-            //then it's a breakpoint or parent node.
-            if (_root.getLeft() == null || _root.getRight() == null) {
-                //i think this is a degenerate case..
-                // all non leafs should have both left and right set
-                System.out.println("degenerate bug. on remove non leaf has left or right null...");
-                System.out.println(" returning this node un modified for now.");
-                return _root;
+            if (_root.getSite().effectivelyEqual(_b.getSite(), 0.01)){
+
+                finishVoronoiEdgeWithVertex(_root);
+                removeCircleEvent(_root.getRight());
+                removeCircleEvent(_root.getLeft());
+
+                return null;
             }
-            // simple case left and right are not breakpoints
-            //follow normal BST procedure searching on x values.
-            if (_root.getSite().compareX(_b) < 0) {
-                _root.setLeft(removeArch(_root, _root.getLeft(), _b));
+
+            if (_root.getSite().compareX(_b.getSite()) < 0) {
+                _root.setLeft(removeArch(_root.getLeft(), _b));
                 //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
                     removeCircleEvent(_root.getRight());
@@ -170,7 +163,7 @@ public class FortuneAlgorithm {
                 return _root;
             }
             else {
-                _root.setRight(removeArch(_root, _root.getRight(), _b));
+                _root.setRight(removeArch(_root.getRight(), _b));
                 //if we delete the right branch we delete the circle event on left branch and return it.
                 if (_root.getRight() == null) {
                     removeCircleEvent(_root.getLeft());
@@ -178,6 +171,7 @@ public class FortuneAlgorithm {
                 }
                 return _root;
             }
+
         }
     }
 
@@ -202,14 +196,10 @@ public class FortuneAlgorithm {
         newChildBreak.setLeft(_newArch);
         newChildBreak.setRight(oldCopy);
         newChildBreak.setSite(FortuneHelpers.perpendicular(_newArch.getSite(), oldCopy.getSite()));
-        newChildBreak.setEdgeEnd(new GNode(newChildBreak.getSite()));
-        voronoi.addVertex(newChildBreak.getEdgeEnd());
 
         newParentBreak.setLeft(_oldArch);
         newParentBreak.setRight(newChildBreak);
         newParentBreak.setSite( FortuneHelpers.perpendicular(_oldArch.getSite(), _newArch.getSite()) );
-        newParentBreak.setEdgeEnd(new GNode(newParentBreak.getSite()));
-        voronoi.addVertex(newParentBreak.getEdgeEnd());
 
         checkForCircleEvent(newParentBreak);
         checkForCircleEvent(newChildBreak);
@@ -224,16 +214,12 @@ public class FortuneAlgorithm {
         return edges;
     }
 
-    private void finishVoronoiEdgeWithVertex(BeachNode _parent, BeachNode _b, Point _l)  {
-        if (_parent.getEdgeEnd() != null) {
-            voronoi.addEdge(_b.getEdgeEnd(),
-                    new GNode(FortuneHelpers.getCenterOfCircumCircle(
-                            _b.getLeft().getSite(), _b.getRight().getSite(), _l)));
-            System.out.println("Edge added.");
-        }
-        else {
-            System.out.println("Collapsing edgeEnd was null.");
-        }
+    private void finishVoronoiEdgeWithVertex(BeachNode _b)  {
+        voronoi.addEdge(new GNode(_b.getSite()),
+                new GNode(FortuneHelpers.getCenterOfCircumCircle(
+                        _b.getLeft().getSite(), _b.getSite(), _b.getRight().getSite())));
+        System.out.println("Edge added.");
+
     }
 
     private boolean checkForCircleEvent(BeachNode _p) {
@@ -247,16 +233,16 @@ public class FortuneAlgorithm {
             return false;
         }
         
-        Point s = FortuneHelpers.getCenterOfCircumCircle(_p.getLeft().getSite(), _p.getRight().getSite(), L.getSite());
+        Point s = FortuneHelpers.getCenterOfCircumCircle(_p.getLeft().getSite(), _p.getSite(), _p.getRight().getSite());
         if ( s.y() + s.euclideanDistance(_p.getSite()) > L.getSite().y() ) {
 
             FortuneEvent ce = new FortuneEvent( new Point (s.x(),
                     s.y() + s.euclideanDistance(_p.getSite())) );
             ce.setArchLeaf(_p);
-            _p.setCircleEvent(ce);
+            _p.getLeft().setCircleEvent(ce);
+            _p.getRight().setCircleEvent(ce);
             events.add(ce);
-            circles.addVertex(new GNode(s));
-            //System.out.println("Adding circle event.");
+
 
             return true;
         }
@@ -276,7 +262,6 @@ public class FortuneAlgorithm {
         }
         _b.getCircle().ifPresent((ce) -> {
             events.remove(ce);
-
             _b.setCircleEvent(null);
         });
     }
