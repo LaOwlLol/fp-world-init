@@ -82,7 +82,6 @@ public class FortuneAlgorithm {
 
                 L.getArchRef().ifPresent((a) -> {
                     System.out.println("Circle event.");
-                    circles.addVertex(new GNode(a.getSite()));
                     removeBeachArch(a);
                 });
 
@@ -101,33 +100,43 @@ public class FortuneAlgorithm {
     }
 
     private void insertBeachArch( BeachNode _b ) {
-        this.beachline = insertArch(this.beachline, _b);
+        this.beachline = insertArch(null, this.beachline, _b);
+
     }
 
     private void removeBeachArch( BeachNode _b) {
         this.beachline = removeArch(this.beachline, _b);
     }
 
-    private BeachNode insertArch(BeachNode _root, BeachNode _b) {
+    private BeachNode insertArch(BeachNode _parent, BeachNode _root, BeachNode _b) {
         if (isArchAbove(_root, _b, L.getSite().y())) {
+            removeCircleEvent(_root);
             _root = splitArch(_root, _b);
+            checkForCircleEvent(_b, _root.getLeft(), getLeftMostArch(_parent));
+            checkForCircleEvent(getRightMostArch(_parent), _root.getLeft(), _b);
             return _root;
         }
 
         if (_b.getSite().x() < _root.getSite().x()) {
             if (_root.getLeft() != null) {
-                _root.setLeft(insertArch(_root.getLeft(), _b));
+                _root.setLeft(insertArch(_root, _root.getLeft(), _b));
             }
             else {
+                removeCircleEvent(_root);
                 _root = splitArch(_root, _b);
+                checkForCircleEvent(_b, _root.getLeft(), getLeftMostArch(_parent));
+                checkForCircleEvent(getRightMostArch(_parent), _root.getLeft(), _b);
                 return _root;
             }
         } else {
             if (_root.getRight() != null) {
-                _root.setRight(insertArch(_root.getRight(), _b));
+                _root.setRight(insertArch(_root, _root.getRight(), _b));
             }
             else {
+                removeCircleEvent(_root);
                 _root = splitArch(_root, _b);
+                checkForCircleEvent(_b, _root.getLeft(), getLeftMostArch(_parent));
+                checkForCircleEvent(getRightMostArch(_parent), _root.getLeft(), _b);
                 return _root;
             }
         }
@@ -141,23 +150,22 @@ public class FortuneAlgorithm {
             return _root;
         }
         if (_root.isLeaf()) {
-            return _root;
-        }
-        else {
-            if (_root.getSite().effectivelyEqual(_b.getSite(), 0.01)){
+            if (_root.getSite().effectivelyEqual(_b.getSite(), 0.01)) {
 
                 finishVoronoiEdgeWithVertex(_root);
                 removeCircleEvent(_root.getRight());
                 removeCircleEvent(_root.getLeft());
-
                 return null;
             }
-
+            else {
+                return (_root);
+            }
+        }
+        else {
             if (_root.getSite().compareX(_b.getSite()) < 0) {
                 _root.setLeft(removeArch(_root.getLeft(), _b));
                 //if we deleted the left branch we delete the circle event on right branch and return it.
                 if (_root.getLeft() == null) {
-                    removeCircleEvent(_root.getRight());
                     return _root.getRight();
                 }
                 return _root;
@@ -166,12 +174,10 @@ public class FortuneAlgorithm {
                 _root.setRight(removeArch(_root.getRight(), _b));
                 //if we delete the right branch we delete the circle event on left branch and return it.
                 if (_root.getRight() == null) {
-                    removeCircleEvent(_root.getLeft());
                     return _root.getLeft();
                 }
                 return _root;
             }
-
         }
     }
 
@@ -179,11 +185,48 @@ public class FortuneAlgorithm {
         if (_root == null) {
            return false;
         }
+        if (!_root.isLeaf()) {
+            return false;
+        }
         if (FortuneHelpers.isQAboveParabolaPL(_q.getSite(), _root.getSite(), _l)) {
             return true;
         }
 
         return false;
+    }
+
+    private BeachNode getLeftMostArch(BeachNode _root) {
+        if (_root == null) {
+            return null;
+        }
+        if (_root.isLeaf()) {
+            return _root;
+        }
+        else {
+            if (_root.getLeft() == null) {
+                return getLeftMostArch(_root.getRight());
+            }
+            else {
+                return getLeftMostArch(_root.getLeft());
+            }
+        }
+    }
+
+    private BeachNode getRightMostArch(BeachNode _root) {
+        if (_root == null) {
+            return _root;
+        }
+        if (_root.isLeaf()) {
+            return _root;
+        }
+        else {
+            if (_root.getRight() == null) {
+                return getRightMostArch(_root.getLeft());
+            }
+            else {
+                return getRightMostArch(_root.getRight());
+            }
+        }
     }
 
     private BeachNode splitArch( BeachNode _oldArch, BeachNode _newArch ) {
@@ -201,9 +244,6 @@ public class FortuneAlgorithm {
         newParentBreak.setRight(newChildBreak);
         newParentBreak.setSite( FortuneHelpers.perpendicular(_oldArch.getSite(), _newArch.getSite()) );
 
-        checkForCircleEvent(newParentBreak);
-        checkForCircleEvent(newChildBreak);
-
         return newParentBreak;
     }
 
@@ -215,41 +255,41 @@ public class FortuneAlgorithm {
     }
 
     private void finishVoronoiEdgeWithVertex(BeachNode _b)  {
-        voronoi.addEdge(new GNode(_b.getSite()),
-                new GNode(FortuneHelpers.getCenterOfCircumCircle(
-                        _b.getLeft().getSite(), _b.getSite(), _b.getRight().getSite())));
+        voronoi.addVertex(_b.getEdgeEnd());
         System.out.println("Edge added.");
 
     }
 
-    private boolean checkForCircleEvent(BeachNode _p) {
-        if (_p == null) {
+    private boolean checkForCircleEvent(BeachNode _i, BeachNode _j, BeachNode _k) {
+        if (_i == null || _j == null || _k == null) {
             return false;
         }
-        if (_p.isLeaf()) {
+        if (_i.getSite().effectivelyEqual(_k.getSite(), 0.01)) {
             return false;
         }
-        if (_p.getLeft().getSite().effectivelyEqual(_p.getRight().getSite(), 0.01)) {
+        if (_i.getSite().effectivelyEqual(_j.getSite(), 0.01)) {
             return false;
         }
-        
-        Point s = FortuneHelpers.getCenterOfCircumCircle(_p.getLeft().getSite(), _p.getSite(), _p.getRight().getSite());
-        if ( s.y() + s.euclideanDistance(_p.getSite()) > L.getSite().y() ) {
+        if (_k.getSite().effectivelyEqual(_j.getSite(), 0.01)) {
+            return false;
+        }
+
+        Point s = FortuneHelpers.getCenterOfCircumCircle(_i.getSite(), _j.getSite(), _k.getSite());
+        if ( s.y() + s.euclideanDistance(_j.getSite()) > L.getSite().y() ) {
 
             FortuneEvent ce = new FortuneEvent( new Point (s.x(),
-                    s.y() + s.euclideanDistance(_p.getSite())) );
-            ce.setArchLeaf(_p);
-            _p.getLeft().setCircleEvent(ce);
-            _p.getRight().setCircleEvent(ce);
+                    s.y() + s.euclideanDistance(_j.getSite())) );
+            ce.setArchLeaf(_j);
+            _j.setEdgeEnd(new GNode(s));
+            this.circles.addVertex(_j.getEdgeEnd());
+            _i.setCircleEvent(ce);
+            _k.setCircleEvent(ce);
             events.add(ce);
-
 
             return true;
         }
-        else {
-            return false;
-        }
 
+        return false;
     }
 
     private void removeCircleEvent(BeachNode _b) {
