@@ -7,6 +7,8 @@ import com.fauxpas.geometry.AdjacencyList;
 
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class FortuneAlgorithm {
 
@@ -24,9 +26,14 @@ public class FortuneAlgorithm {
         this.circles = new Graph();
         this.beachline = null;
         this.events = new PriorityQueue<FortuneEvent>(_pointCount, FortuneHelpers::compareYNatural);
+        int lowD = 100;
+        int highW = (int) Math.floor(_width - lowD);
+        int highH = (int) Math.floor(_height - lowD);
+
 
         for (int i = 0; i < _pointCount; ++i) {
-            this.events.offer(new FortuneEvent(new Point(Math.random() * _width, Math.random() * _height)));
+            this.events.offer(new FortuneEvent(new Point( ThreadLocalRandom.current().nextInt(lowD, highW),
+                    ThreadLocalRandom.current().nextInt(lowD, highH))));
         }
 
 
@@ -150,7 +157,7 @@ public class FortuneAlgorithm {
             return _root;
         }
         if (_root.isLeaf()) {
-            if (_root.getSite().effectivelyEqual(_b.getSite(), 0.01)) {
+            if (_root.getSite().effectivelyEqual(_b.getSite(), 1)) {
 
                 finishVoronoiEdgeWithVertex(_root);
                 removeCircleEvent(_root.getRight());
@@ -256,7 +263,7 @@ public class FortuneAlgorithm {
 
     private void finishVoronoiEdgeWithVertex(BeachNode _b)  {
         voronoi.addVertex(_b.getEdgeEnd());
-        System.out.println("Edge added.");
+        System.out.println("HalfEdge added.");
 
     }
 

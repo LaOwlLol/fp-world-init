@@ -25,10 +25,10 @@ public class Voronoi extends Application {
     public Voronoi() {
 
         this.width = 600;
-        this.height = 500;
+        this.height = 600;
         this.pointRadius = 5;
 
-        this.fa = new FortuneAlgorithm(50, this.width, this.height);
+        this.fa = new FortuneAlgorithm(10, this.width, this.height);
 
 
     }
