@@ -1,4 +1,4 @@
-package com.fauxpas.geometry.topology;
+package com.fauxpas.geometry;
 
 import java.util.ArrayList;
 

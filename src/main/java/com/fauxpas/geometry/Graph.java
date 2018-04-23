@@ -1,93 +1,52 @@
 package com.fauxpas.geometry;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.HashSet;
 
 public class Graph {
 
-	private List<AdjacencyList> data;
+    private HashSet<Vertex> vertices;
+    private HashSet<Face> faces;
+    private HashSet<HalfEdge> edges;
 
-	public Graph() {
-		this.data = new ArrayList<AdjacencyList>();
-	}
+    public HashSet<Vertex> getVertices() {
+        return vertices;
+    }
 
-	public void addVertex(GNode _v) {
-		if (!getAdjacencyList(_v).isPresent()) {
-			this.addVertexWithEdges(new AdjacencyList(_v));
-		}		
-	}
+    public HashSet<Face>  getFaces() {
+        return faces;
+    }
 
-	public void addEdge(GNode _root, GNode _v) {
-		this.addHalfEdge(_root, _v);
-		this.addHalfEdge(_v, _root);
-	}
+    public HashSet<HalfEdge> getEdges() {
+        return edges;
+    }
 
-	public void addHalfEdge(GNode _root, GNode _v) {
-		if (!whenHasAdjListAddNode(_root, _v)) {
-			this.addVertex(_root);
-			this.whenHasAdjListAddNode(_root, _v);
-		}
-	}
+    public void addVertex(Vertex v) {
+        this.vertices.add(v);
+    }
 
-	public void addVertexWithEdges(AdjacencyList _e) {
-		if (_e.hasRoot()) {
-			this.data.add(_e);
-		}
-	}
+    public void addHalfEdge(HalfEdge e) {
+        this.edges.add(e);
+    }
 
-	public void incoperateEdges(AdjacencyList _e) {
-		if (_e.hasRoot()) {
-			if (this.getAdjacencyList(_e.getRoot()).isPresent()) {
-				this.getAdjacencyList(_e.getRoot()).ifPresent( (adjList) -> {
-					adjList.addAdjacencies(_e);
-				});
-			}
-			else {
-				this.addVertexWithEdges(_e);
-			}
-		}
-	}
+    public void addFace(Face f) {
+        this.faces.add(f);
+    }
 
-	public List<GNode> getVertices() {
-		ArrayList<GNode> verticies = new ArrayList<GNode>();
-		for (AdjacencyList _e: data) {
-			verticies.add(_e.getRoot());
-		}
+    public Graph() {
+        this.vertices = new HashSet<>();
+        this.faces = new HashSet<>();
+        this.edges = new HashSet<>();
+    }
 
-		return verticies;
-	} 
-
-	public List<List<GNode>> getEdges() {
-		ArrayList<List<GNode>> edgesList = new ArrayList<List<GNode>>();
-		for (AdjacencyList aList: data) {
-			for (GNode _v: aList.getAdjacencies()) {
-				ArrayList<GNode> edge  = new ArrayList<GNode>();
-				edge.add(aList.getRoot());
-				edge.add(_v);
-				edgesList.add(edge);
-			}
-		}
-
-		return edgesList;
-	}
-
-	private boolean whenHasAdjListAddNode(GNode _root, GNode _v) {
-		getAdjacencyList(_root).ifPresent( (el) -> {
-			el.addAdjacency(_v);
-		});
-
-		return getAdjacencyList(_root).isPresent();
-	}
-
-	private Optional<AdjacencyList> getAdjacencyList(GNode _root) {
-		for (AdjacencyList _e: data) {
-			if (_e.isRoot(_root)) {
-				return Optional.of(_e);
-			}
-		}
-
-		return Optional.empty();
-	}
-
+    public Graph(HashSet<Vertex> _vertices, HashSet<Face> _faces, HashSet<HalfEdge> _edges) {
+        if (_vertices != null) {
+            this.vertices = _vertices;
+        }
+        if (_faces != null) {
+            this.faces = _faces;
+        }
+        if (_edges != null) {
+            this.edges = _edges;
+        }
+    }
 }

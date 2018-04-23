@@ -40,18 +40,6 @@ public class FortuneHelpers {
 		return ((_q.euclideanDistance(_p) - (_q.y() - _l) ) < 0.001);
 	}
 
-	public static int compareYNatural(FortuneEvent o1, FortuneEvent o2) {
-		return o1.getSite().compareY(o2.getSite());
-	}
-
-	public static int compareYReverse(FortuneEvent o1, FortuneEvent o2) {
-		return o2.getSite().compareY(o1.getSite());
-	}
-
-	public static int compareX(FortuneEvent o1, FortuneEvent o2) {
-		return o1.getSite().compareX(o2.getSite());
-	}
-
 	public static int compareQtoParabolaPL(Point _q, Point _p, double _l) {
 		if (!isQOnParabolaPL(_q, _p, _l)) {
 			if ( isQAboveParabolaPL(_q, _p, _l) ) {
