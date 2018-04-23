@@ -23,7 +23,10 @@
 
 package com.fauxpas.fortunes.ajwerner;
 
+import com.fauxpas.geometry.Graph;
+import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
+import com.fauxpas.geometry.Vertex;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -44,92 +47,44 @@ public class Voronoi {
     private TreeMap<ArcKey, CircleEvent> arcs;
     private TreeSet<Event> events;
 
-    public double getSweepLoc() {
-        return sweepLoc;
-    }
+    private Graph vg;
 
-    public static void main(String[] args) {
-
-        if (args.length > 0) {
-            int N = Integer.parseInt(args[0]);;
-            double _width = Integer.parseInt(args[1]);;
-            double _height = Integer.parseInt(args[2]);;
-            int lowD = Integer.parseInt(args[3]);;
-            int highW = (int) Math.floor(_width - lowD);
-            int highH = (int) Math.floor(_height - lowD);
-            ArrayList<Point> sites = new ArrayList<Point>();
-            Random rnd = new Random();
-            for (int i = 0; i < N; i++) {
-                //sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
-                //        ThreadLocalRandom.current().nextInt(lowD, highH)));
-                sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
-            }
-            //StdDraw.setCanvasSize(_width, _height);
-            //StdDraw.setScale(-.1, 1.1);
-            Voronoi v = new Voronoi(sites, false);
-            //v.show();
-        }
-        else {
-            int N = 50;
-            double _width = 600;
-            double _height = 600;
-            int lowD = 100;
-            int highW = (int) Math.floor(_width - lowD);
-            int highH = (int) Math.floor(_height - lowD);
-            ArrayList<Point> sites = new ArrayList<Point>();
-            Random rnd = new Random();
-            for (int i = 0; i < N; i++) {
-                //sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
-                //        ThreadLocalRandom.current().nextInt(lowD, highH)));
-                sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
-            }
-            //StdDraw.setCanvasSize(_width, _height);
-            //StdDraw.setScale(-.1, 1.1);
-            Voronoi v = new Voronoi(sites);
-            //v.show();
-        }
-    }
-
-    public Voronoi(ArrayList<Point> sites) {
-        this(sites, false);
-    }
-
-    public Voronoi(ArrayList<Point> sites, boolean animate) {
+    public Voronoi() {
         // initialize data structures;
-        this.sites = sites;
-        edgeList = new ArrayList<VoronoiEdge>(sites.size());
+        this.sites = new ArrayList<>();
+        edgeList = new ArrayList<VoronoiEdge>();
         events = new TreeSet<Event>();
         breakPoints = new HashSet<BreakPoint>();
         arcs = new TreeMap<ArcKey, CircleEvent>();
 
-        validateSites(this.sites, true, true);
-        addEvents(this.sites);
-
-        sweepLoc = MAX_DIM;
-        do {
-            Event cur = events.pollFirst();
-            sweepLoc = cur.p.y();
-            //if (animate) this.draw();
-            if (cur.getClass() == Event.class) {
-                handleSiteEvent(cur);
-            }
-            else {
-                CircleEvent ce = (CircleEvent) cur;
-                handleCircleEvent(ce);
-            }
-        } while ((events.size() > 0));
-
-        this.sweepLoc = MIN_DIM; // hack to draw negative infinite points
-        for (BreakPoint bp : breakPoints) {
-            bp.finish();
-        }
     }
 
-    public void validateSites(ArrayList<Point> siteList, boolean throwRE, boolean filterInvalid) {
+    public double getSweepLoc() {
+        return sweepLoc;
+    }
+
+    /**
+     *
+     * Check that all Points in a list have x and y coordinates in exclusive range MIN_DIM to MAX_DIM.
+     *
+     * TODO: this should change.  Seems like ajwerner Points were -10 to 10 (to draw ?).
+     *
+     * @param siteList  List of points to validate.
+     * @param throwRE  If this method should throw runtime exception on bad site.
+     * @param filterInvalid  If this method should remove invalid sites from list.
+     *                       Note** this mean the method will return true (having removed invalid points).
+     * @return True is sites are valid (and no runtime exception is thrown.).
+     */
+    public boolean validateSites(ArrayList<Point> siteList, boolean throwRE, boolean filterInvalid) {
+        boolean valid = true;
+
         for (Point site : siteList) {
             if ((site.x() > MAX_DIM || site.x() < MIN_DIM) || (site.y() > MAX_DIM || site.y() < MIN_DIM)) {
                 if (filterInvalid) {
                     siteList.remove(site);
+                }
+                else {
+                    valid = false;
                 }
                 if (throwRE) {
                     throw new RuntimeException(String.format(
@@ -137,16 +92,55 @@ public class Voronoi {
                 }
             }
         }
+
+        return valid;
     }
 
+    /**
+     * Add a list of points to the initial (no circle events detected) Events list.
+     *
+     * @param siteList a list of Points.
+     */
     public void addEvents(ArrayList<Point> siteList) {
         for (Point site : siteList) {
             events.add(new Event(site));
         }
     }
 
-    public void processNextSite() {
+    /**
+     * Get this Voronoi object ready for processing
+     * ie:
+     * 1. set the sweepline to the initial position
+     *
+     * //TODO anything else?
+     */
+    public void init() {
+        sweepLoc = MAX_DIM;
+    }
 
+
+    /**
+     *
+     */
+    public void processNextEvent() {
+        if (!events.isEmpty()) {
+            Event cur = events.pollFirst();
+            sweepLoc = cur.p.y();
+            //if (animate) this.draw();
+            if (cur.getClass() == Event.class) {
+                handleSiteEvent(cur);
+            } else {
+                CircleEvent ce = (CircleEvent) cur;
+                handleCircleEvent(ce);
+            }
+        }
+    }
+
+    public void finishBreakPoints() {
+        this.sweepLoc = MIN_DIM; // hack to draw negative infinite points
+        for (BreakPoint bp : breakPoints) {
+            bp.finish();
+        }
     }
 
     private void handleSiteEvent(Event cur) {
@@ -262,8 +256,21 @@ public class Voronoi {
         }
     }
 
-    /*
-    private void show() {
+    public ArrayList<HalfEdge> getEdges() {
+        ArrayList<HalfEdge> e = new ArrayList<>();
+        e.addAll(vg.getEdges());
+        return e;
+    }
+
+    public ArrayList<Point> getVertices() {
+        ArrayList<Point> V = new ArrayList<>();
+        for (Vertex v: vg.getVertices()) {
+            V.add(v.getCoordinates());
+        }
+        return V;
+    }
+
+   /* private void show() {
         StdDraw.clear();
         for (Point p : sites) {
             p.draw(StdDraw.RED);
@@ -296,6 +303,6 @@ public class Voronoi {
         }
         StdDraw.line(MIN_DIM, sweepLoc, MAX_DIM, sweepLoc);
         StdDraw.show(1);
-    }
-    */
+    }*/
+
 }
