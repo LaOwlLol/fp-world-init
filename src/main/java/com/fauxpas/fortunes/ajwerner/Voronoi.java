@@ -26,6 +26,7 @@ package com.fauxpas.fortunes.ajwerner;
 import com.fauxpas.geometry.Point;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by ajwerner on 12/23/13.
@@ -48,29 +49,42 @@ public class Voronoi {
     }
 
     public static void main(String[] args) {
+
         if (args.length > 0) {
-            int N = Integer.parseInt(args[0]);
+            int N = Integer.parseInt(args[0]);;
+            double _width = Integer.parseInt(args[1]);;
+            double _height = Integer.parseInt(args[2]);;
+            int lowD = Integer.parseInt(args[3]);;
+            int highW = (int) Math.floor(_width - lowD);
+            int highH = (int) Math.floor(_height - lowD);
             ArrayList<Point> sites = new ArrayList<Point>();
             Random rnd = new Random();
             for (int i = 0; i < N; i++) {
-                sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
+                sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
+                        ThreadLocalRandom.current().nextInt(lowD, highH)));
             }
-            //StdDraw.setCanvasSize(1024, 1024);
+            //StdDraw.setCanvasSize(_width, _height);
             //StdDraw.setScale(-.1, 1.1);
             Voronoi v = new Voronoi(sites, true);
             //v.show();
         }
         else {
-            int numTrials = 5;
-            System.out.println("         N:   \ttime (s)");
-            int[] Ns = {50000, 100000, 200000, 400000, 800000, 1600000, 3200000};
-            for (int n : Ns) {
-                double res[] = new double[numTrials];
-                for (int i = 0; i < numTrials; i++) {
-                    res[i] = randomTrial(n);
-                }
-                //System.out.printf("%10d:\t%-5.6f +/- %f \n", n, StdStats.mean(res), StdStats.stddev(res)/Math.sqrt(numTrials));
+            int N = 50;
+            double _width = 600;
+            double _height = 600;
+            int lowD = 100;
+            int highW = (int) Math.floor(_width - lowD);
+            int highH = (int) Math.floor(_height - lowD);
+            ArrayList<Point> sites = new ArrayList<Point>();
+            Random rnd = new Random();
+            for (int i = 0; i < N; i++) {
+                sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
+                        ThreadLocalRandom.current().nextInt(lowD, highH)));
             }
+            //StdDraw.setCanvasSize(_width, _height);
+            //StdDraw.setScale(-.1, 1.1);
+            Voronoi v = new Voronoi(sites, true);
+            //v.show();
         }
     }
 
