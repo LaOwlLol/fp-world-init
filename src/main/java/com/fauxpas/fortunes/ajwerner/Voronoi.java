@@ -60,12 +60,13 @@ public class Voronoi {
             ArrayList<Point> sites = new ArrayList<Point>();
             Random rnd = new Random();
             for (int i = 0; i < N; i++) {
-                sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
-                        ThreadLocalRandom.current().nextInt(lowD, highH)));
+                //sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
+                //        ThreadLocalRandom.current().nextInt(lowD, highH)));
+                sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
             }
             //StdDraw.setCanvasSize(_width, _height);
             //StdDraw.setScale(-.1, 1.1);
-            Voronoi v = new Voronoi(sites, true);
+            Voronoi v = new Voronoi(sites, false);
             //v.show();
         }
         else {
@@ -78,30 +79,15 @@ public class Voronoi {
             ArrayList<Point> sites = new ArrayList<Point>();
             Random rnd = new Random();
             for (int i = 0; i < N; i++) {
-                sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
-                        ThreadLocalRandom.current().nextInt(lowD, highH)));
+                //sites.add(new Point(ThreadLocalRandom.current().nextInt(lowD, highW),
+                //        ThreadLocalRandom.current().nextInt(lowD, highH)));
+                sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
             }
             //StdDraw.setCanvasSize(_width, _height);
             //StdDraw.setScale(-.1, 1.1);
-            Voronoi v = new Voronoi(sites, true);
+            Voronoi v = new Voronoi(sites);
             //v.show();
         }
-    }
-
-    private static double randomTrial(int N) {
-        Random rnd = new Random();
-        ArrayList<Point> sites = new ArrayList<Point>();
-        //Stopwatch s = new Stopwatch();
-        double stop, start;
-        sites.clear();
-        for (int i = 0; i < N; i++) {
-            sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
-        }
-        //start = s.elapsedTime();
-        Voronoi v = new Voronoi(sites);
-        //stop = s.elapsedTime();
-
-        return 0;//stop-start;
     }
 
     public Voronoi(ArrayList<Point> sites) {
@@ -116,12 +102,9 @@ public class Voronoi {
         breakPoints = new HashSet<BreakPoint>();
         arcs = new TreeMap<ArcKey, CircleEvent>();
 
-        for (Point site : sites) {
-            if ((site.x() > MAX_DIM || site.x() < MIN_DIM) || (site.y() > MAX_DIM || site.y() < MIN_DIM))
-                throw new RuntimeException(String.format(
-                        "Invalid site in input, sites must be between %f and %f", MIN_DIM, MAX_DIM ));
-            events.add(new Event(site));
-        }
+        validateSites(this.sites, true, true);
+        addEvents(this.sites);
+
         sweepLoc = MAX_DIM;
         do {
             Event cur = events.pollFirst();
@@ -140,6 +123,30 @@ public class Voronoi {
         for (BreakPoint bp : breakPoints) {
             bp.finish();
         }
+    }
+
+    public void validateSites(ArrayList<Point> siteList, boolean throwRE, boolean filterInvalid) {
+        for (Point site : siteList) {
+            if ((site.x() > MAX_DIM || site.x() < MIN_DIM) || (site.y() > MAX_DIM || site.y() < MIN_DIM)) {
+                if (filterInvalid) {
+                    siteList.remove(site);
+                }
+                if (throwRE) {
+                    throw new RuntimeException(String.format(
+                            "Invalid site in input, sites must be between %f and %f", MIN_DIM, MAX_DIM));
+                }
+            }
+        }
+    }
+
+    public void addEvents(ArrayList<Point> siteList) {
+        for (Point site : siteList) {
+            events.add(new Event(site));
+        }
+    }
+
+    public void processNextSite() {
+
     }
 
     private void handleSiteEvent(Event cur) {

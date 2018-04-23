@@ -128,7 +128,7 @@ public class Point implements Comparable<Point>{
         return (this.x < o.x) ? -1 : 1;
     }
 
-    @Override
+
     public String toString() {
         return String.format("(%.3f, %.3f)", this.x, this.y);
     }

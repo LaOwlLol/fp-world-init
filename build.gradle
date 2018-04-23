@@ -27,5 +27,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-mainClassName = "com.fauxpas.applications.Voronoi"
+mainClassName = "com.fauxpas.fortunes.ajwerner.Voronoi"
 
