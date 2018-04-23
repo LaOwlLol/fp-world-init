@@ -57,6 +57,8 @@ public class HalfEdge {
         this.incidentFace = incidentFace;
     }
 
+    public HalfEdge() { }
+
     public HalfEdge(Vertex origin) {
         this.origin = origin;
     }

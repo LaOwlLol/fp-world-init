@@ -4,6 +4,8 @@ import com.fauxpas.fortunes.FortuneAlgorithm;
 import com.fauxpas.geometry.GNode;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.Point;
+import com.fauxpas.geometry.topology.HalfEdge;
+import com.fauxpas.geometry.topology.Vertex;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -14,21 +16,24 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Set;
 
 public class Voronoi extends Application {
 
     FortuneAlgorithm fa;
     double width;
     double height;
+    int padding;
     int pointRadius;
 
     public Voronoi() {
 
         this.width = 600;
         this.height = 600;
+        this.padding = 150;
         this.pointRadius = 5;
 
-        this.fa = new FortuneAlgorithm(10, this.width, this.height);
+        this.fa = new FortuneAlgorithm(10, this.width, this.height, padding);
 
 
     }
@@ -75,24 +80,23 @@ public class Voronoi extends Application {
 
     public void drawVertices(GraphicsContext gc) {
 
-        for (GNode _v: this.fa.getSites()) {
-            gc.fillOval(_v.location().x()-(this.pointRadius/2),
-                    _v.location().y()-(this.pointRadius/2),
+        for (Vertex _v: this.fa.getSites()) {
+            gc.fillOval(_v.getCoordinates().x()-(this.pointRadius/2),
+                    _v.getCoordinates().y()-(this.pointRadius/2),
                     this.pointRadius,
                     this.pointRadius);
         }
-        gc.setFill(Color.BLUE);
-        for (GNode _v: this.fa.getVertices()) {
-            gc.fillOval(_v.location().x()-(this.pointRadius/2),
-                    _v.location().y()-(this.pointRadius/2),
-                    this.pointRadius,
-                    this.pointRadius);
-        }
-
         gc.setFill(Color.ORANGE);
-        for (GNode _v: this.fa.getCircles()) {
-            gc.fillOval(_v.location().x()-(this.pointRadius/2),
-                    _v.location().y()-(this.pointRadius/2),
+        for (Vertex _v: this.fa.getCircles()) {
+            gc.fillOval(_v.getCoordinates().x()-(this.pointRadius/2),
+                    _v.getCoordinates().y()-(this.pointRadius/2),
+                    this.pointRadius,
+                    this.pointRadius);
+        }
+        gc.setFill(Color.GREEN);
+        for (Vertex _v: this.fa.getVertices()) {
+            gc.fillOval(_v.getCoordinates().x()-(this.pointRadius/2),
+                    _v.getCoordinates().y()-(this.pointRadius/2),
                     this.pointRadius,
                     this.pointRadius);
         }
@@ -102,9 +106,9 @@ public class Voronoi extends Application {
     }
 
     public void drawEdges(GraphicsContext gc) {
-        for (List<GNode> edge: this.fa.getEdges()) {
-            drawArrow(gc,edge.get(0).location(), edge.get(1).location());
-        }
+        /*for (Set<HalfEdge> edge: this.fa.getEdges()) {
+            drawArrow(gc,edge.Origin().location(), );
+        }*/
     }
 
     private void drawArrow(GraphicsContext gc, Point tail, Point tip)

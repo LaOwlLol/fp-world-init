@@ -87,4 +87,8 @@ public class Point {
                 && ( Math.abs(this.y() - _other.y()) < _tolerance );
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder().append(this.x()).append(",").append(this.y()).toString();
+    }
 }
