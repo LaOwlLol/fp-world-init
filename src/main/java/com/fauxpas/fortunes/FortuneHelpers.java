@@ -5,9 +5,6 @@ import com.fauxpas.geometry.Point;
 import java.util.Comparator;
 
 public class FortuneHelpers {
-	public static boolean areCounterClockWise(Point _a, Point _b, Point _c) {
-		return (_b.x() - _a.x())*(_c.y() -_a.y()) - (_c.x() - _a.x())*(_b.y() - _a.y()) > 0;
-	}
 
 	public static boolean inCircle(Point _a, Point _b, Point _c, Point _test) {
 		double ax_ = _a.x()-_test.x();
@@ -24,9 +21,6 @@ public class FortuneHelpers {
 			) > 0;
 	}
 
-	public static boolean isADirectlyBelowB(Point _a, Point _b) {
-		return (_a.compareX(_b) == 0 && _a.compareY(_b) == -1);
-	}
 
 	public static boolean isQAboveParabolaPL(Point _q, Point _p, double _l) {
 		return _q.euclideanDistance(_p) < (_q.y() - _l);
@@ -60,10 +54,6 @@ public class FortuneHelpers {
 
 	public static Point VoronoiTransfrom(Point _z, Point _s) {
 		return new Point(  _z.x() , (_z.y() + _z.euclideanDistance(_s)) );
-	}
-
-	public static Point getMidPoint(Point _a, Point _b) {
-		return new Point( _a.x() + ((_a.x() - _b.x())/2),  _a.y()+ ((_a.y() - _b.y())/2)  );
 	}
 
 	public static Point perpendicular(Point _a, Point _b) {
