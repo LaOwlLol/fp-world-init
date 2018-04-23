@@ -1,34 +1,32 @@
 package com.fauxpas.fortunes;
 
-
+import com.fauxpas.geometry.GNode;
+import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.Point;
 import com.fauxpas.geometry.AdjacencyList;
-import com.fauxpas.geometry.topology.DCELGraph;
-import com.fauxpas.geometry.topology.HalfEdge;
-import com.fauxpas.geometry.topology.Vertex;
 
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FortuneAlgorithm {
 
-    private DCELGraph voronoi;
-    private DCELGraph sites;
-    private DCELGraph circles;
+    private Graph voronoi;
+    private Graph sites;
+    private Graph circles;
     private BeachNode beachline;
     private PriorityQueue<FortuneEvent> events;
     private FortuneEvent L;
     private double sweep;
 
-    public FortuneAlgorithm(int _pointCount, double _width, double _height, int padding) {
-        this.voronoi = new DCELGraph();
-        this.sites = new DCELGraph();
-        this.circles = new DCELGraph();
+    public FortuneAlgorithm(int _pointCount, double _width, double _height) {
+        this.voronoi = new Graph();
+        this.sites = new Graph();
+        this.circles = new Graph();
         this.beachline = null;
         this.events = new PriorityQueue<FortuneEvent>(_pointCount, FortuneHelpers::compareYNatural);
-        int lowD = padding;
+        int lowD = 100;
         int highW = (int) Math.floor(_width - lowD);
         int highH = (int) Math.floor(_height - lowD);
 
@@ -52,19 +50,19 @@ public class FortuneAlgorithm {
         }
     }
 
-    public Set<Vertex> getSites() {
+    public List<GNode> getSites() {
         return this.sites.getVertices();
     }
 
-    public Set<Vertex> getCircles() {
+    public List<GNode> getCircles() {
         return this.circles.getVertices();
     }
 
-    public Set<Vertex> getVertices() {
+    public List<GNode> getVertices() {
         return this.voronoi.getVertices();
     }
 
-    public Set<HalfEdge> getEdges() {
+    public List<List<GNode>> getEdges() {
         return this.voronoi.getEdges();
     }
 
@@ -76,28 +74,6 @@ public class FortuneAlgorithm {
     /*                                Tree Methods                               */
     /*****************************************************************************/
 
-    private boolean isBalanced(BeachNode _b) {
-        return (beachHeight(_b) > -1);
-    }
-
-    private int beachHeight(BeachNode _b) {
-        if (_b == null) {
-            return 0;
-        }
-
-        int h1 = beachHeight(_b.getLeft());
-        int h2 = beachHeight(_b.getRight());
-
-        if (h1 == -1 || h2 == -1) {
-            return -1;
-        }
-        if (Math.abs(h1-h2) > 1) {
-            return -1;
-        }
-
-        return Math.max(h1, h2) + 1;
-    }
-
     public void processGraph() {
         while (!events.isEmpty()) {
            processNextEvent();
@@ -108,12 +84,11 @@ public class FortuneAlgorithm {
         if (!events.isEmpty()) {
             L = events.poll();
             this.sweep = L.getSite().y();
-            sites.addVertex(new Vertex(L.getSite()));
+            sites.addVertex(new GNode(L.getSite()));
             if (L.getArchRef().isPresent()) {
 
                 L.getArchRef().ifPresent((a) -> {
                     System.out.println("Circle event.");
-                    this.voronoi.addVertex(new Vertex(L.getCircleSite()));
                     removeBeachArch(a);
                 });
 
@@ -134,6 +109,10 @@ public class FortuneAlgorithm {
     private void insertBeachArch( BeachNode _b ) {
         this.beachline = insertArch(null, this.beachline, _b);
 
+    }
+
+    private void removeBeachArch( BeachNode _b) {
+        this.beachline = removeArch(this.beachline, _b);
     }
 
     private BeachNode insertArch(BeachNode _parent, BeachNode _root, BeachNode _b) {
@@ -168,59 +147,45 @@ public class FortuneAlgorithm {
                 return _root;
             }
         }
-        return _root;
-    }
 
-    private void removeBeachArch( BeachNode _b) {
-        System.out.println("searching for "+_b.getSite().toString());
-        this.beachline = removeArch(this.beachline, _b);
+
+        return _root;
     }
 
     private BeachNode removeArch(BeachNode _root, BeachNode _b) {
-        /* Base Case: If the tree is empty */
-        if (_root == null)  return _root;
+        if (_root == null) {
+            return _root;
+        }
+        if (_root.isLeaf()) {
+            if (_root.getSite().effectivelyEqual(_b.getSite(), 1)) {
 
-        // check this is a parent.
-        if (!_root.isLeaf()) {
-            /* Otherwise, recur down the tree */
-            if (_b.getSite().x() < _root.getSite().x()) {
-                if (_root.getLeft() != null) {
-                    _root.setLeft(removeArch(_root.getLeft(), _b));
-                    if (_root.getLeft() == null) {
-                        removeCircleEvent(getLeftMostArch(_root));
-                        removeCircleEvent(getRightMostArch(_root));
-                        finishVoronoiEdgeWithVertex(_root, _b);
-                        return _root.getRight();
-                    }
-                }
-                else {
-                    return _root;
-                }
+                finishVoronoiEdgeWithVertex(_root);
+                removeCircleEvent(_root.getRight());
+                removeCircleEvent(_root.getLeft());
+                return null;
             }
             else {
-                if (_root.getRight() != null) {
-                    _root.setRight(removeArch(_root.getRight(), _b));
-                    if (_root.getRight() == null) {
-                        removeCircleEvent(getLeftMostArch(_root));
-                        removeCircleEvent(getRightMostArch(_root));
-                        finishVoronoiEdgeWithVertex(_root, _b);
-                        return _root.getLeft();
-                    }
-                }
-                else {
-                    return _root;
-                }
+                return (_root);
             }
         }
-
-            // if key is same as root's key, then This is the node
-            // to be deleted
-        else if (_root.isLeaf() && _b.getSite().effectivelyEqual(_root.getSite(), 0.01))
-        {
-           return null;
+        else {
+            if (_root.getSite().compareX(_b.getSite()) < 0) {
+                _root.setLeft(removeArch(_root.getLeft(), _b));
+                //if we deleted the left branch we delete the circle event on right branch and return it.
+                if (_root.getLeft() == null) {
+                    return _root.getRight();
+                }
+                return _root;
+            }
+            else {
+                _root.setRight(removeArch(_root.getRight(), _b));
+                //if we delete the right branch we delete the circle event on left branch and return it.
+                if (_root.getRight() == null) {
+                    return _root.getLeft();
+                }
+                return _root;
+            }
         }
-
-        return _root;
     }
 
     private boolean isArchAbove(BeachNode _root, BeachNode _q, double _l ) {
@@ -286,12 +251,18 @@ public class FortuneAlgorithm {
         newParentBreak.setRight(newChildBreak);
         newParentBreak.setSite( FortuneHelpers.perpendicular(_oldArch.getSite(), _newArch.getSite()) );
 
-
         return newParentBreak;
     }
 
-    private void finishVoronoiEdgeWithVertex(BeachNode _parent, BeachNode _b)  {
+    private AdjacencyList getNewEdge(Point _v) {
+        GNode vertex = new GNode(_v);
+        AdjacencyList edges = new AdjacencyList(vertex);
+        voronoi.addVertexWithEdges(edges);
+        return edges;
+    }
 
+    private void finishVoronoiEdgeWithVertex(BeachNode _b)  {
+        voronoi.addVertex(_b.getEdgeEnd());
         System.out.println("HalfEdge added.");
 
     }
@@ -316,10 +287,8 @@ public class FortuneAlgorithm {
             FortuneEvent ce = new FortuneEvent( new Point (s.x(),
                     s.y() + s.euclideanDistance(_j.getSite())) );
             ce.setArchLeaf(_j);
-            ce.setCircleSite(s);
-            _j.setHalfEdge(new HalfEdge(new Vertex(s)));
-            this.circles.addVertex(new Vertex(ce.getSite()));
-            //_j.setCircleEvent(ce);
+            _j.setEdgeEnd(new GNode(s));
+            this.circles.addVertex(_j.getEdgeEnd());
             _i.setCircleEvent(ce);
             _k.setCircleEvent(ce);
             events.add(ce);
@@ -334,12 +303,12 @@ public class FortuneAlgorithm {
         if (_b == null) {
             return;
         }
+
         if (!_b.isLeaf()) {
             return;
         }
         _b.getCircle().ifPresent((ce) -> {
             events.remove(ce);
-            System.out.println("removed ce from "+_b.getSite().toString());
             _b.setCircleEvent(null);
         });
     }

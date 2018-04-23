@@ -1,7 +1,8 @@
 package com.fauxpas.fortunes;
 
 import com.fauxpas.geometry.Point;
-import com.fauxpas.geometry.topology.HalfEdge;
+import com.fauxpas.geometry.AdjacencyList;
+import com.fauxpas.geometry.GNode;
 
 import java.util.Optional;
 
@@ -13,14 +14,14 @@ public class BeachNode {
     private BeachNode right;
 
     private FortuneEvent circleEvent;
-    private HalfEdge halfEdge;
+    private GNode edgeEnd;
 
     public BeachNode() {
     	this.site = null;
     	this.left = null;
     	this.right = null;
     	this.circleEvent = null;
-    	this.halfEdge = null;
+    	this.edgeEnd = null;
     }
 
     public void setSite(Point _s) {
@@ -48,8 +49,8 @@ public class BeachNode {
      *
      * @param _v edge list this breakpoint belongs on.
      */
-    public void setHalfEdge(HalfEdge _v) {
-        this.halfEdge = _v;
+    public void setEdgeEnd(GNode _v) {
+        this.edgeEnd = _v;
     }
 
     /**
@@ -99,15 +100,15 @@ public class BeachNode {
     }
 
     /**
-     * Get the end point on the opposite side of the end being traced by this halfEdge.
+     * Get the end point on the opposite side of the end being traced by this edgeEnd.
      *
      * Note: This may be null only becuase this BeachNode may be a leaf and not a break point.
-     * Note: All breakpoints should return a halfEdge.
+     * Note: All breakpoints should return a edgeEnd.
      *
      * @return a vertex of the voronoi graph on the opposite end of this breakpoints traced edge.
      */
-    public HalfEdge getHalfEdge() {
-    	return this.halfEdge;
+    public GNode getEdgeEnd() {
+    	return this.edgeEnd;
     }
 
     /**

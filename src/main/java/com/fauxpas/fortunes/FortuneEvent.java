@@ -8,10 +8,9 @@ public class FortuneEvent {
 
     private Point site;
     private BeachNode archLeaf;
-    private Point circleSite;
 
     /**
-     * Note to construct this event as a circleSite event that collapses
+     * Note to construct this event as a circle event that collapses
      * an arch of the beachline, use setArchLeaf to associate the
      * collapsed arch of the beachline.
      *
@@ -23,9 +22,9 @@ public class FortuneEvent {
 
     /**
      * Set an associated arch of the beachline to make this
-     * a circleSite event.
+     * a circle event.
      *
-     * @param _l the arch leaf associated with this circleSite event.
+     * @param _l the arch leaf associated with this circle event.
      */
     public void setArchLeaf(BeachNode _l) {
         this.archLeaf = _l;
@@ -50,19 +49,11 @@ public class FortuneEvent {
     }
 
     /**
-     * Get the beachline arch leaf for this circleSite event.
+     * Get the beachline arch leaf for this circle event.
      *
-     * @return A leaf node of the beachline collapsed but this circleSite event.
+     * @return A leaf node of the beachline collapsed but this circle event.
      */
     public Optional<BeachNode> getArchRef() {
         return Optional.ofNullable(archLeaf);
-    }
-
-    public Point getCircleSite() {
-        return circleSite;
-    }
-
-    public void setCircleSite(Point circleSite) {
-        this.circleSite = circleSite;
     }
 }
