@@ -1,6 +1,7 @@
 package com.fauxpas.applications;
 
 import com.fauxpas.fortunes.ajwerner.Voronoi;
+import com.fauxpas.fortunes.ajwerner.VoronoiEdge;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
 import javafx.animation.AnimationTimer;
@@ -17,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class VoronoiSample extends Application {
 
+    private final double padding;
     Voronoi voronoi;
     ArrayList<Point> sites;
     double width;
@@ -25,18 +27,20 @@ public class VoronoiSample extends Application {
 
     public VoronoiSample() {
 
-        this.width = 600;
-        this.height = 600;
+        this.width = 1024;
+        this.height = 768;
+        this.padding = 100;
         this.pointRadius = 5;
         this.sites = new ArrayList<>();
 
 
-        int low = -10;
-        int high = 10;
+        double low = padding;
+        double x_max = width - padding;
+        double y_max = height - padding;
 
-        for (int i = 0; i < 100; i++) {
-            this.sites.add(new Point(ThreadLocalRandom.current().nextDouble(low, high),
-                    ThreadLocalRandom.current().nextDouble(low, high)));
+        for (int i = 0; i < 400; i++) {
+            this.sites.add(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
+                    ThreadLocalRandom.current().nextDouble(low, y_max)));
             //sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
         }
 
@@ -49,13 +53,13 @@ public class VoronoiSample extends Application {
         Group root = new Group();
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        //this.fa.processGraph();
-
-
 
         root.getChildren().add(canvas);
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
+
+        voronoi.addEvents(sites);
+        voronoi.init();
 
         AnimationTimer timer = new AnimationTimer() {
 
@@ -63,11 +67,17 @@ public class VoronoiSample extends Application {
 
             @Override
             public void handle(long now) {
-                if (count % 100 == 0){
+                if (count % 10 == 0){
                     GraphicsContext gc = canvas.getGraphicsContext2D();
 
                     gc.clearRect(0, 0, width, height);
 
+                    if (voronoi.hasNextEvent()) {
+                        voronoi.processNextEvent();
+                    }
+                    else if (!voronoi.isFinal()) {
+                        voronoi.finishBreakPoints();
+                    }
 
                     drawGraph(gc);
                 }
@@ -79,8 +89,8 @@ public class VoronoiSample extends Application {
 
     public void drawGraph(GraphicsContext gc) {
         drawVertices(gc);
-        //drawEdges(gc);
-        //drawSweepLine(gc);
+        drawEdges(gc);
+        drawSweepLine(gc);
     }
 
     public void drawVertices(GraphicsContext gc) {
@@ -91,20 +101,24 @@ public class VoronoiSample extends Application {
                     this.pointRadius,
                     this.pointRadius);
         }
-        gc.setFill(Color.BLUE);
-        /*for (Point _v: this.voronoi.getVertices()) {
+        /*gc.setFill(Color.BLUE);
+        for (Point _v: this.voronoi.getVertices()) {
             gc.fillOval(_v.x()-(this.pointRadius/2),
                     _v.y()-(this.pointRadius/2),
                     this.pointRadius,
                     this.pointRadius);
-        }*/
-        gc.setFill(Color.BLACK);
+        }
+        gc.setFill(Color.BLACK);*/
     }
 
     public void drawEdges(GraphicsContext gc) {
-        for (HalfEdge edge: this.voronoi.getEdges()) {
-            drawArrow(gc, edge.Origin().getCoordinates() , edge.Destination().getCoordinates() );
+        gc.setStroke(Color.BLUE);
+        for (VoronoiEdge edge: this.voronoi.getEdges()) {
+            if (edge.p1 != null && edge.p2 != null) {
+                drawArrow(gc, edge.p1, edge.p2);
+            }
         }
+        gc.setStroke(Color.BLACK);
     }
 
     public void drawSweepLine(GraphicsContext gc) {

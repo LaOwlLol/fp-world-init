@@ -29,7 +29,6 @@ import com.fauxpas.geometry.Point;
 import com.fauxpas.geometry.Vertex;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by ajwerner on 12/23/13.
@@ -46,8 +45,9 @@ public class Voronoi {
     private HashSet<BreakPoint> breakPoints;
     private TreeMap<ArcKey, CircleEvent> arcs;
     private TreeSet<Event> events;
+    private boolean finished;
 
-    private Graph vg;
+    //private Graph graph;
 
     public Voronoi() {
         // initialize data structures;
@@ -56,44 +56,15 @@ public class Voronoi {
         events = new TreeSet<Event>();
         breakPoints = new HashSet<BreakPoint>();
         arcs = new TreeMap<ArcKey, CircleEvent>();
+        //graph = new Graph();
+    }
 
+    public boolean hasNextEvent() {
+        return !events.isEmpty();
     }
 
     public double getSweepLoc() {
         return sweepLoc;
-    }
-
-    /**
-     *
-     * Check that all Points in a list have x and y coordinates in exclusive range MIN_DIM to MAX_DIM.
-     *
-     * TODO: this should change.  Seems like ajwerner Points were -10 to 10 (to draw ?).
-     *
-     * @param siteList  List of points to validate.
-     * @param throwRE  If this method should throw runtime exception on bad site.
-     * @param filterInvalid  If this method should remove invalid sites from list.
-     *                       Note** this mean the method will return true (having removed invalid points).
-     * @return True is sites are valid (and no runtime exception is thrown.).
-     */
-    public boolean validateSites(ArrayList<Point> siteList, boolean throwRE, boolean filterInvalid) {
-        boolean valid = true;
-
-        for (Point site : siteList) {
-            if ((site.x() > MAX_DIM || site.x() < MIN_DIM) || (site.y() > MAX_DIM || site.y() < MIN_DIM)) {
-                if (filterInvalid) {
-                    siteList.remove(site);
-                }
-                else {
-                    valid = false;
-                }
-                if (throwRE) {
-                    throw new RuntimeException(String.format(
-                            "Invalid site in input, sites must be between %f and %f", MIN_DIM, MAX_DIM));
-                }
-            }
-        }
-
-        return valid;
     }
 
     /**
@@ -116,14 +87,15 @@ public class Voronoi {
      */
     public void init() {
         sweepLoc = MAX_DIM;
+        finished = false;
     }
 
 
     /**
-     *
+     * Handle the next event.
      */
     public void processNextEvent() {
-        if (!events.isEmpty()) {
+        if (hasNextEvent()) {
             Event cur = events.pollFirst();
             sweepLoc = cur.p.y();
             //if (animate) this.draw();
@@ -136,11 +108,15 @@ public class Voronoi {
         }
     }
 
+    /**
+     *
+     */
     public void finishBreakPoints() {
         this.sweepLoc = MIN_DIM; // hack to draw negative infinite points
         for (BreakPoint bp : breakPoints) {
             bp.finish();
         }
+        finished = true;
     }
 
     private void handleSiteEvent(Event cur) {
@@ -256,18 +232,24 @@ public class Voronoi {
         }
     }
 
-    public ArrayList<HalfEdge> getEdges() {
-        ArrayList<HalfEdge> e = new ArrayList<>();
-        e.addAll(vg.getEdges());
-        return e;
+    public ArrayList<VoronoiEdge> getEdges() {
+
+        return edgeList;
+        /*ArrayList<HalfEdge> e = new ArrayList<>();
+        e.addAll(graph.getEdges());
+        return e;*/
     }
 
-    public ArrayList<Point> getVertices() {
+    /*public ArrayList<Point> getVertices() {
         ArrayList<Point> V = new ArrayList<>();
-        for (Vertex v: vg.getVertices()) {
+        for (Vertex v: graph.getVertices()) {
             V.add(v.getCoordinates());
         }
         return V;
+    }*/
+
+    public boolean isFinal() {
+        return finished;
     }
 
    /* private void show() {
