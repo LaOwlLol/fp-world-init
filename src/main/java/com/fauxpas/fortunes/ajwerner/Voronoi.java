@@ -141,10 +141,10 @@ public class Voronoi {
             graph.addHalfEdge(w);
 
             newEdge.setP1( new Point((cur.p.x() + arcAbove.site.x())/2, Double.POSITIVE_INFINITY) );
-            v.setOrigin(new Vertex(newEdge.getP1()));
+            w.setOrigin(new Vertex(newEdge.getP1()));
 
 
-            BreakPoint newBreak = new BreakPoint(arcAbove.site, cur.p, newEdge, w, v, false, this);
+            BreakPoint newBreak = new BreakPoint(arcAbove.site, cur.p, newEdge, v, w, false, this);
             breakPoints.add(newBreak);
             this.edgeList.add(newEdge);
             Arc arcLeft = new Arc(null, newBreak, this);
@@ -172,7 +172,7 @@ public class Voronoi {
         graph.addHalfEdge(v);
         graph.addHalfEdge(w);
 
-        BreakPoint newBreakL = new BreakPoint(arcAbove.site, cur.p, newEdge, w, v,true, this);
+        BreakPoint newBreakL = new BreakPoint(arcAbove.site, cur.p, newEdge, v, w,true, this);
         BreakPoint newBreakR = new BreakPoint(cur.p, arcAbove.site, newEdge, v, w, false, this);
         breakPoints.add(newBreakL);
         breakPoints.add(newBreakR);
@@ -230,11 +230,11 @@ public class Voronoi {
         boolean isLeftPoint = (turnsLeft) ? (e.m < 0) : (e.m > 0);
         if (isLeftPoint) {
             e.setP1(ce.vert);
-            v.setOrigin(new Vertex(ce.vert));
+            w.setOrigin(new Vertex(ce.vert));
         }
         else {
             e.setP2(ce.vert);
-            w.setOrigin(new Vertex(ce.vert));
+            v.setOrigin(new Vertex(ce.vert));
         }
 
         BreakPoint newBP = new BreakPoint(ce.arc.left.s1, ce.arc.right.s2, e, w, v, !isLeftPoint, this);

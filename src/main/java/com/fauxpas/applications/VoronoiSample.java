@@ -27,8 +27,8 @@ public class VoronoiSample extends Application {
 
     public VoronoiSample() {
 
-        this.width = 1024;
-        this.height = 768;
+        this.width = 1920;
+        this.height = 1080;
         this.padding = 100;
         this.pointRadius = 5;
         this.sites = new ArrayList<>();
@@ -37,7 +37,7 @@ public class VoronoiSample extends Application {
         double x_max = width - padding;
         double y_max = height - padding;
 
-        for (int i = 0; i < 400; i++) {
+        for (int i = 0; i < 4000; i++) {
             this.sites.add(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
                     ThreadLocalRandom.current().nextDouble(low, y_max)));
             //sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
@@ -60,35 +60,49 @@ public class VoronoiSample extends Application {
         voronoi.addEvents(sites);
         voronoi.init();
 
-        AnimationTimer timer = new AnimationTimer() {
+
+        AnimationTimer processor = new AnimationTimer() {
+
+            @Override
+            public void handle(long now) {
+
+                if (voronoi.hasNextEvent()) {
+                    voronoi.processNextEvent();
+                }
+                else if (!voronoi.isFinal()) {
+                    voronoi.finishBreakPoints();
+                    this.stop();
+                }
+
+            }
+        };
+        processor.start();
+
+        AnimationTimer draw = new AnimationTimer() {
 
             private long count = 0;
 
             @Override
             public void handle(long now) {
-                if (count % 10 == 0){
+                if (count%100 == 0) {
                     GraphicsContext gc = canvas.getGraphicsContext2D();
 
                     gc.clearRect(0, 0, width, height);
-
-                    if (voronoi.hasNextEvent()) {
-                        voronoi.processNextEvent();
-                    }
-                    else if (!voronoi.isFinal()) {
-                        voronoi.finishBreakPoints();
-                    }
-
                     drawGraph(gc);
+
                 }
+
                 count++;
             }
         };
-        timer.start();
+        draw.start();
+
+
     }
 
     public void drawGraph(GraphicsContext gc) {
         drawVertices(gc);
-        drawEdgeList(gc);
+        //drawEdgeList(gc);
         drawEdges(gc);
         drawSweepLine(gc);
     }
