@@ -23,7 +23,10 @@
 
 package com.fauxpas.fortunes.ajwerner;
 
+import com.fauxpas.geometry.Graph;
+import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
+import com.fauxpas.geometry.Vertex;
 
 /**
  * Created by ajwerner on 12/28/13.
@@ -32,17 +35,21 @@ public class BreakPoint {
     private final Voronoi v;
     protected final Point s1, s2;
     private VoronoiEdge e;
+    private HalfEdge in;
+    private HalfEdge out;
     private boolean isEdgeLeft;
     public final Point edgeBegin;
 
     private double cacheSweepLoc;
     private Point cachePoint;
 
-    public BreakPoint(Point left, Point right, VoronoiEdge e, boolean isEdgeLeft, Voronoi v) {
+    public BreakPoint(Point left, Point right, VoronoiEdge e, HalfEdge _in, HalfEdge _out, boolean isEdgeLeft, Voronoi v) {
         this.v = v;
         this.s1 = left;
         this.s2 = right;
         this.e = e;
+        this.in = _in;
+        this.out = _out;
         this.isEdgeLeft = isEdgeLeft;
         this.edgeBegin = this.getPoint();
     }
@@ -51,23 +58,33 @@ public class BreakPoint {
         return d * d;
     }
 
-    public void finish(Point vert) {
+    public void finish(Point vert, Graph g) {
         if (isEdgeLeft) {
-            this.e.p1 = vert;
+            this.e.setP1(vert);
+            this.out.setOrigin(new Vertex(vert));
         }
         else {
-            this.e.p2 = vert;
+            this.e.setP2(vert);
+            this.in.setOrigin(new Vertex(vert));
         }
+
+        //g.addHalfEdge(in);
+        //g.addHalfEdge(out);
     }
 
-    public void finish() {
+    public void finish(Graph g) {
         Point p = this.getPoint();
         if (isEdgeLeft) {
-            this.e.p1 = p;
+            this.e.setP1(p);
+            this.out.setOrigin(new Vertex(p));
         }
         else {
-            this.e.p2 = p;
+            this.e.setP2(p);
+            this.in.setOrigin(new Vertex(p));
         }
+
+        //g.addHalfEdge(in);
+        //g.addHalfEdge(out);
     }
 
     public Point getPoint() {
@@ -119,5 +136,13 @@ public class BreakPoint {
 
     public VoronoiEdge getEdge() {
         return this.e;
+    }
+
+    public HalfEdge getIn() {
+        return this.in;
+    }
+
+    public HalfEdge getOut() {
+        return this.out;
     }
 }

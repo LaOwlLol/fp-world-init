@@ -47,7 +47,7 @@ public class Voronoi {
     private TreeSet<Event> events;
     private boolean finished;
 
-    //private Graph graph;
+    private Graph graph;
 
     public Voronoi() {
         // initialize data structures;
@@ -56,7 +56,7 @@ public class Voronoi {
         events = new TreeSet<Event>();
         breakPoints = new HashSet<BreakPoint>();
         arcs = new TreeMap<ArcKey, CircleEvent>();
-        //graph = new Graph();
+        graph = new Graph();
     }
 
     public boolean hasNextEvent() {
@@ -98,7 +98,7 @@ public class Voronoi {
         if (hasNextEvent()) {
             Event cur = events.pollFirst();
             sweepLoc = cur.p.y();
-            //if (animate) this.draw();
+
             if (cur.getClass() == Event.class) {
                 handleSiteEvent(cur);
             } else {
@@ -114,7 +114,7 @@ public class Voronoi {
     public void finishBreakPoints() {
         this.sweepLoc = MIN_DIM; // hack to draw negative infinite points
         for (BreakPoint bp : breakPoints) {
-            bp.finish();
+            bp.finish(graph);
         }
         finished = true;
     }
@@ -133,8 +133,18 @@ public class Voronoi {
         // Deal with the degenerate case where the first two points are at the same y value
         if (arcs.size() == 0 && arcAbove.site.y() == cur.p.y()) {
             VoronoiEdge newEdge = new VoronoiEdge(arcAbove.site, cur.p);
-            newEdge.p1 = new Point((cur.p.x() + arcAbove.site.x())/2, Double.POSITIVE_INFINITY);
-            BreakPoint newBreak = new BreakPoint(arcAbove.site, cur.p, newEdge, false, this);
+            HalfEdge v = new HalfEdge();
+            HalfEdge w = new HalfEdge();
+            v.setTwin(w);
+            w.setTwin(v);
+            graph.addHalfEdge(v);
+            graph.addHalfEdge(w);
+
+            newEdge.setP1( new Point((cur.p.x() + arcAbove.site.x())/2, Double.POSITIVE_INFINITY) );
+            v.setOrigin(new Vertex(newEdge.getP1()));
+
+
+            BreakPoint newBreak = new BreakPoint(arcAbove.site, cur.p, newEdge, w, v, false, this);
             breakPoints.add(newBreak);
             this.edgeList.add(newEdge);
             Arc arcLeft = new Arc(null, newBreak, this);
@@ -155,8 +165,15 @@ public class Voronoi {
         BreakPoint breakR = arcAbove.right;
         VoronoiEdge newEdge = new VoronoiEdge(arcAbove.site, cur.p);
         this.edgeList.add(newEdge);
-        BreakPoint newBreakL = new BreakPoint(arcAbove.site, cur.p, newEdge, true, this);
-        BreakPoint newBreakR = new BreakPoint(cur.p, arcAbove.site, newEdge, false, this);
+        HalfEdge v = new HalfEdge();
+        HalfEdge w = new HalfEdge();
+        v.setTwin(w);
+        w.setTwin(v);
+        graph.addHalfEdge(v);
+        graph.addHalfEdge(w);
+
+        BreakPoint newBreakL = new BreakPoint(arcAbove.site, cur.p, newEdge, w, v,true, this);
+        BreakPoint newBreakR = new BreakPoint(cur.p, arcAbove.site, newEdge, v, w, false, this);
         breakPoints.add(newBreakL);
         breakPoints.add(newBreakR);
 
@@ -188,14 +205,20 @@ public class Voronoi {
         }
         arcs.remove(ce.arc);
 
-        ce.arc.left.finish(ce.vert);
-        ce.arc.right.finish(ce.vert);
+        ce.arc.left.finish(ce.vert, graph);
+        ce.arc.right.finish(ce.vert, graph);
 
         breakPoints.remove(ce.arc.left);
         breakPoints.remove(ce.arc.right);
 
         VoronoiEdge e = new VoronoiEdge(ce.arc.left.s1, ce.arc.right.s2);
         edgeList.add(e);
+        HalfEdge v = new HalfEdge();
+        HalfEdge w = new HalfEdge();
+        v.setTwin(w);
+        w.setTwin(v);
+        graph.addHalfEdge(v);
+        graph.addHalfEdge(w);
 
         // Here we're trying to figure out if the org.ajwerner.voronoi.Voronoi vertex we've found is the left
         // or right point of the new edge.
@@ -203,15 +226,18 @@ public class Voronoi {
         // that the vertex is going to be above the current point
         boolean turnsLeft = Point.ccw(arcLeft.right.edgeBegin, ce.p, arcRight.left.edgeBegin) == 1;
         // So if it turns left, we know the next vertex will be below this vertex
-        // so if it's below and the slow is negative then this vertex is the left point
+        // so if it's below and the slope is negative then this vertex is the left point
         boolean isLeftPoint = (turnsLeft) ? (e.m < 0) : (e.m > 0);
         if (isLeftPoint) {
-            e.p1 = ce.vert;
+            e.setP1(ce.vert);
+            v.setOrigin(new Vertex(ce.vert));
         }
         else {
-            e.p2 = ce.vert;
+            e.setP2(ce.vert);
+            w.setOrigin(new Vertex(ce.vert));
         }
-        BreakPoint newBP = new BreakPoint(ce.arc.left.s1, ce.arc.right.s2, e, !isLeftPoint, this);
+
+        BreakPoint newBP = new BreakPoint(ce.arc.left.s1, ce.arc.right.s2, e, w, v, !isLeftPoint, this);
         breakPoints.add(newBP);
 
         arcRight.left = newBP;
@@ -232,12 +258,12 @@ public class Voronoi {
         }
     }
 
-    public ArrayList<VoronoiEdge> getEdges() {
-
+    public ArrayList<VoronoiEdge> getEdgeList() {
         return edgeList;
-        /*ArrayList<HalfEdge> e = new ArrayList<>();
-        e.addAll(graph.getEdges());
-        return e;*/
+    }
+
+    public HashSet<HalfEdge> getEdges() {
+        return graph.getEdges();
     }
 
     /*public ArrayList<Point> getVertices() {
@@ -251,40 +277,5 @@ public class Voronoi {
     public boolean isFinal() {
         return finished;
     }
-
-   /* private void show() {
-        StdDraw.clear();
-        for (Point p : sites) {
-            p.draw(StdDraw.RED);
-        }
-        for (VoronoiEdge e : edgeList) {
-            if (e.p1 != null && e.p2 != null) {
-                double topY = (e.p1.y == Double.POSITIVE_INFINITY) ? MAX_DIM : e.p1.y; // HACK to draw from infinity
-                StdDraw.line(e.p1.x, topY, e.p2.x, e.p2.y);
-            }
-        }
-        StdDraw.show();
-    }
-
-    private void draw() {
-        StdDraw.clear();
-        for (Point p : sites) {
-            p.draw(StdDraw.RED);
-        }
-        for (BreakPoint bp : breakPoints) {
-            bp.draw();
-        }
-        for (ArcKey a : arcs.keySet()) {
-            ((Arc) a).draw();
-        }
-        for (VoronoiEdge e : edgeList) {
-            if (e.p1 != null && e.p2 != null) {
-                double topY = (e.p1.y == Double.POSITIVE_INFINITY) ? MAX_DIM : e.p1.y; // HACK to draw from infinity
-                StdDraw.line(e.p1.x, topY, e.p2.x, e.p2.y);
-            }
-        }
-        StdDraw.line(MIN_DIM, sweepLoc, MAX_DIM, sweepLoc);
-        StdDraw.show(1);
-    }*/
 
 }

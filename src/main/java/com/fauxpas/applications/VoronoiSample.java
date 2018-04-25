@@ -33,7 +33,6 @@ public class VoronoiSample extends Application {
         this.pointRadius = 5;
         this.sites = new ArrayList<>();
 
-
         double low = padding;
         double x_max = width - padding;
         double y_max = height - padding;
@@ -89,6 +88,7 @@ public class VoronoiSample extends Application {
 
     public void drawGraph(GraphicsContext gc) {
         drawVertices(gc);
+        drawEdgeList(gc);
         drawEdges(gc);
         drawSweepLine(gc);
     }
@@ -111,14 +111,28 @@ public class VoronoiSample extends Application {
         gc.setFill(Color.BLACK);*/
     }
 
-    public void drawEdges(GraphicsContext gc) {
-        gc.setStroke(Color.BLUE);
-        for (VoronoiEdge edge: this.voronoi.getEdges()) {
-            if (edge.p1 != null && edge.p2 != null) {
-                drawArrow(gc, edge.p1, edge.p2);
+    public void drawEdgeList(GraphicsContext gc) {
+        gc.setStroke(Color.DARKGREEN);
+        for (VoronoiEdge edge: this.voronoi.getEdgeList()) {
+            if (edge.getP1() != null && edge.getP2() != null) {
+                drawLine(gc, edge.getP1(), edge.getP2());
             }
         }
         gc.setStroke(Color.BLACK);
+    }
+
+    public void drawEdges(GraphicsContext gc) {
+        gc.setStroke(Color.CORNFLOWERBLUE);
+        for (HalfEdge edge: this.voronoi.getEdges()) {
+            if (edge.Origin() != null && edge.Destination() != null) {
+                drawArrow(gc, edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
+            }
+        }
+        gc.setStroke(Color.BLACK);
+    }
+
+    public void drawLine(GraphicsContext gc, Point p1, Point p2) {
+        gc.strokeLine(p1.x(), p1.y(), p2.x(),  p2.y());
     }
 
     public void drawSweepLine(GraphicsContext gc) {
@@ -129,7 +143,7 @@ public class VoronoiSample extends Application {
 
     private void drawArrow(GraphicsContext gc, Point tail, Point tip)
     {
-        int barb = 6;
+        int barb = 4;
         double phi = Math.toRadians(40);
         double dy = tip.y() - tail.y();
         double dx = tip.x() - tail.x();

@@ -32,7 +32,23 @@ public class VoronoiEdge {
     public final Point site1, site2;
     public final double m, b; // parameters for line that the edge lies on
     public final boolean isVertical;
-    public Point p1, p2;
+    private Point p1, p2;
+
+    public void setP1(Point p1) {
+        this.p1 = p1;
+    }
+
+    public void setP2(Point p2) {
+        this.p2 = p2;
+    }
+
+    public Point getP1() {
+        return p1;
+    }
+
+    public Point getP2() {
+        return p2;
+    }
 
     public VoronoiEdge(Point site1, Point site2) {
         this.site1 = site1;
