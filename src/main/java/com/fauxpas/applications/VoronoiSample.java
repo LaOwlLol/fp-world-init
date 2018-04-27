@@ -6,14 +6,26 @@ import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class VoronoiSample extends Application {
@@ -23,12 +35,13 @@ public class VoronoiSample extends Application {
     ArrayList<Point> sites;
     double width;
     double height;
+    Button save;
     int pointRadius;
 
     public VoronoiSample() {
 
-        this.width = 1920;
-        this.height = 1080;
+        this.width = 1024;
+        this.height = 768;
         this.padding = 100;
         this.pointRadius = 5;
         this.sites = new ArrayList<>();
@@ -37,7 +50,7 @@ public class VoronoiSample extends Application {
         double x_max = width - padding;
         double y_max = height - padding;
 
-        for (int i = 0; i < 4000; i++) {
+        for (int i = 0; i < 400; i++) {
             this.sites.add(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
                     ThreadLocalRandom.current().nextDouble(low, y_max)));
             //sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
@@ -49,11 +62,25 @@ public class VoronoiSample extends Application {
 
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Graph Voronoi Test");
+
         Group root = new Group();
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
+        save = new Button("save");
+        save.setLayoutX(width- padding/2);
+        save.setLayoutY(height - padding/2);
+        save.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                saveGraph();
+            }
+        });
+
+
         root.getChildren().add(canvas);
+        root.getChildren().add(save);
+
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
@@ -84,7 +111,7 @@ public class VoronoiSample extends Application {
 
             @Override
             public void handle(long now) {
-                if (count%100 == 0) {
+                if (count%10 == 0) {
                     GraphicsContext gc = canvas.getGraphicsContext2D();
 
                     gc.clearRect(0, 0, width, height);
@@ -97,6 +124,46 @@ public class VoronoiSample extends Application {
         };
         draw.start();
 
+
+    }
+
+    private void saveGraph() {
+
+        Path path = Paths.get(System.getProperty("user.home"), "VoronoiGraphs", "newVoronoi");
+
+        Charset charset = Charset.forName("US-ASCII");
+        StringBuilder data = new StringBuilder();
+
+        for (HalfEdge h: this.voronoi.getEdges()) {
+            data.append(h.Origin().getCoordinates().x());
+            data.append(",");
+            data.append(h.Origin().getCoordinates().y());
+            data.append(">");
+            data.append(h.Destination().getCoordinates().x());
+            data.append(",");
+            data.append(h.Destination().getCoordinates().y());
+            data.append("\n");
+        }
+
+        data.append("verts\n");
+
+        for (Point s: this.sites) {
+            data.append(s.x()).append(",").append(s.y()).append("\n");
+        }
+        try {
+            Files.createDirectories(path.getParent());
+
+            try (BufferedWriter writer = Files.newBufferedWriter(
+                    path,
+                    charset, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                writer.write(data.toString(), 0, data.length());
+            }
+
+        }catch (IOException x) {
+            System.err.format("IOException: %s%n", x);
+        }
+
+        this.voronoi.getEdges();
 
     }
 
