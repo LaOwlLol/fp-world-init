@@ -1,9 +1,11 @@
 package com.fauxpas.geometry;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Graph {
 
+    private ArrayList<Point> voronoiSites;
     private HashSet<Vertex> vertices;
     private HashSet<Face> faces;
     private HashSet<HalfEdge> edges;
@@ -32,21 +34,45 @@ public class Graph {
         this.faces.add(f);
     }
 
+    public ArrayList<Point> getSites() {
+        return voronoiSites;
+    }
+
+    public void setSites(ArrayList<Point> voronoiSites) {
+        this.voronoiSites = voronoiSites;
+    }
+
     public Graph() {
         this.vertices = new HashSet<>();
         this.faces = new HashSet<>();
         this.edges = new HashSet<>();
+        this.voronoiSites = new ArrayList<>();
     }
 
-    public Graph(HashSet<Vertex> _vertices, HashSet<Face> _faces, HashSet<HalfEdge> _edges) {
+    public Graph(HashSet<Vertex> _vertices, HashSet<Face> _faces, HashSet<HalfEdge> _edges, ArrayList<Point> _sites) {
         if (_vertices != null) {
             this.vertices = _vertices;
+        }
+        else {
+            this.vertices = new HashSet<>();
         }
         if (_faces != null) {
             this.faces = _faces;
         }
+        else {
+            this.faces = new HashSet<>();
+        }
         if (_edges != null) {
             this.edges = _edges;
+        }
+        else {
+            this.edges = new HashSet<>();
+        }
+        if (_sites != null) {
+            this.voronoiSites = _sites;
+        }
+        else {
+            this.voronoiSites = new ArrayList<>();
         }
     }
 }

@@ -34,24 +34,22 @@ import java.util.*;
  * Created by ajwerner on 12/23/13.
  */
 public class Voronoi {
-    public static final double MIN_DRAW_DIM = -5;
-    public static final double MAX_DRAW_DIM = 5;
-    // Ghetto but just for drawing stuff
+
+    // TODO fix min/max dim to match height of canvas.
     private static final double MAX_DIM = 10;
     private static final double MIN_DIM = -10;
-    private double sweepLoc;
-    private final ArrayList<Point> sites;
+
     private final ArrayList<VoronoiEdge> edgeList;
     private HashSet<BreakPoint> breakPoints;
     private TreeMap<ArcKey, CircleEvent> arcs;
     private TreeSet<Event> events;
-    private boolean finished;
-
     private Graph graph;
+    private boolean finished;
+    private double sweepLoc;
+
 
     public Voronoi() {
         // initialize data structures;
-        this.sites = new ArrayList<>();
         edgeList = new ArrayList<VoronoiEdge>();
         events = new TreeSet<Event>();
         breakPoints = new HashSet<BreakPoint>();
@@ -73,6 +71,7 @@ public class Voronoi {
      * @param siteList a list of Points.
      */
     public void addEvents(ArrayList<Point> siteList) {
+        graph.setSites(siteList);
         for (Point site : siteList) {
             events.add(new Event(site));
         }
@@ -117,6 +116,10 @@ public class Voronoi {
             bp.finish(graph);
         }
         finished = true;
+    }
+
+    public boolean isFinal() {
+        return finished;
     }
 
     private void handleSiteEvent(Event cur) {
@@ -266,16 +269,7 @@ public class Voronoi {
         return graph.getEdges();
     }
 
-    /*public ArrayList<Point> getVertices() {
-        ArrayList<Point> V = new ArrayList<>();
-        for (Vertex v: graph.getVertices()) {
-            V.add(v.getCoordinates());
-        }
-        return V;
-    }*/
-
-    public boolean isFinal() {
-        return finished;
+    public Graph getGraph() {
+        return graph;
     }
-
 }

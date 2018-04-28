@@ -4,6 +4,7 @@ import com.fauxpas.fortunes.ajwerner.Voronoi;
 import com.fauxpas.fortunes.ajwerner.VoronoiEdge;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
+import com.fauxpas.io.GraphFile;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -50,7 +51,7 @@ public class VoronoiSample extends Application {
         double x_max = width - padding;
         double y_max = height - padding;
 
-        for (int i = 0; i < 400; i++) {
+        for (int i = 0; i < 10; i++) {
             this.sites.add(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
                     ThreadLocalRandom.current().nextDouble(low, y_max)));
             //sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
@@ -129,41 +130,8 @@ public class VoronoiSample extends Application {
 
     private void saveGraph() {
 
-        Path path = Paths.get(System.getProperty("user.home"), "VoronoiGraphs", "newVoronoi");
-
-        Charset charset = Charset.forName("US-ASCII");
-        StringBuilder data = new StringBuilder();
-
-        for (HalfEdge h: this.voronoi.getEdges()) {
-            data.append(h.Origin().getCoordinates().x());
-            data.append(",");
-            data.append(h.Origin().getCoordinates().y());
-            data.append(">");
-            data.append(h.Destination().getCoordinates().x());
-            data.append(",");
-            data.append(h.Destination().getCoordinates().y());
-            data.append("\n");
-        }
-
-        data.append("verts\n");
-
-        for (Point s: this.sites) {
-            data.append(s.x()).append(",").append(s.y()).append("\n");
-        }
-        try {
-            Files.createDirectories(path.getParent());
-
-            try (BufferedWriter writer = Files.newBufferedWriter(
-                    path,
-                    charset, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-                writer.write(data.toString(), 0, data.length());
-            }
-
-        }catch (IOException x) {
-            System.err.format("IOException: %s%n", x);
-        }
-
-        this.voronoi.getEdges();
+        GraphFile gf = new GraphFile(System.getProperty("user.home")+"/"+"VoronoiGraphs", "newVoronoi");
+        gf.write(this.voronoi.getGraph());
 
     }
 
