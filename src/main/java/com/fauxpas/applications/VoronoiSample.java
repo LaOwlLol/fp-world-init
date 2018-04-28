@@ -5,6 +5,7 @@ import com.fauxpas.fortunes.ajwerner.VoronoiEdge;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
 import com.fauxpas.io.GraphFile;
+import com.fauxpas.io.GraphRenderer;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -33,25 +34,26 @@ public class VoronoiSample extends Application {
 
     private final double padding;
     Voronoi voronoi;
+    GraphRenderer graphRenderer;
     ArrayList<Point> sites;
     double width;
     double height;
     Button save;
-    int pointRadius;
+
 
     public VoronoiSample() {
 
         this.width = 1024;
         this.height = 768;
         this.padding = 100;
-        this.pointRadius = 5;
         this.sites = new ArrayList<>();
+
 
         double low = padding;
         double x_max = width - padding;
         double y_max = height - padding;
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 400; i++) {
             this.sites.add(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
                     ThreadLocalRandom.current().nextDouble(low, y_max)));
             //sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
@@ -67,6 +69,8 @@ public class VoronoiSample extends Application {
         Group root = new Group();
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
         GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        this.graphRenderer = new GraphRenderer(gc, width, height);
 
         save = new Button("save");
         save.setLayoutX(width- padding/2);
@@ -96,6 +100,7 @@ public class VoronoiSample extends Application {
 
                 if (voronoi.hasNextEvent()) {
                     voronoi.processNextEvent();
+                    //drawSweepLine(gc);
                 }
                 else if (!voronoi.isFinal()) {
                     voronoi.finishBreakPoints();
@@ -106,25 +111,8 @@ public class VoronoiSample extends Application {
         };
         processor.start();
 
-        AnimationTimer draw = new AnimationTimer() {
-
-            private long count = 0;
-
-            @Override
-            public void handle(long now) {
-                if (count%10 == 0) {
-                    GraphicsContext gc = canvas.getGraphicsContext2D();
-
-                    gc.clearRect(0, 0, width, height);
-                    drawGraph(gc);
-
-                }
-
-                count++;
-            }
-        };
-        draw.start();
-
+        AnimationTimer animation = graphRenderer.getAnimation(voronoi.getGraph());
+        animation.start();
 
     }
 
@@ -135,76 +123,10 @@ public class VoronoiSample extends Application {
 
     }
 
-    public void drawGraph(GraphicsContext gc) {
-        drawVertices(gc);
-        //drawEdgeList(gc);
-        drawEdges(gc);
-        drawSweepLine(gc);
-    }
-
-    public void drawVertices(GraphicsContext gc) {
-
-        for (Point _v: this.sites) {
-            gc.fillOval(_v.x()-(this.pointRadius/2),
-                    _v.y()-(this.pointRadius/2),
-                    this.pointRadius,
-                    this.pointRadius);
-        }
-        /*gc.setFill(Color.BLUE);
-        for (Point _v: this.voronoi.getVertices()) {
-            gc.fillOval(_v.x()-(this.pointRadius/2),
-                    _v.y()-(this.pointRadius/2),
-                    this.pointRadius,
-                    this.pointRadius);
-        }
-        gc.setFill(Color.BLACK);*/
-    }
-
-    public void drawEdgeList(GraphicsContext gc) {
-        gc.setStroke(Color.DARKGREEN);
-        for (VoronoiEdge edge: this.voronoi.getEdgeList()) {
-            if (edge.getP1() != null && edge.getP2() != null) {
-                drawLine(gc, edge.getP1(), edge.getP2());
-            }
-        }
-        gc.setStroke(Color.BLACK);
-    }
-
-    public void drawEdges(GraphicsContext gc) {
-        gc.setStroke(Color.CORNFLOWERBLUE);
-        for (HalfEdge edge: this.voronoi.getEdges()) {
-            if (edge.Origin() != null && edge.Destination() != null) {
-                drawArrow(gc, edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
-            }
-        }
-        gc.setStroke(Color.BLACK);
-    }
-
-    public void drawLine(GraphicsContext gc, Point p1, Point p2) {
-        gc.strokeLine(p1.x(), p1.y(), p2.x(),  p2.y());
-    }
-
     public void drawSweepLine(GraphicsContext gc) {
         gc.setStroke(Color.RED);
         gc.strokeLine(0, this.voronoi.getSweepLoc(), this.width,  this.voronoi.getSweepLoc());
         gc.setStroke(Color.BLACK);
     }
 
-    private void drawArrow(GraphicsContext gc, Point tail, Point tip)
-    {
-        int barb = 4;
-        double phi = Math.toRadians(40);
-        double dy = tip.y() - tail.y();
-        double dx = tip.x() - tail.x();
-        double theta = Math.atan2(dy, dx);
-        double x, y, rho = theta + phi;
-        gc.strokeLine(tail.x(), tail.y(), tip.x(), tip.y());
-        for(int j = 0; j < 2; j++)
-        {
-            x = tip.x() - barb * Math.cos(rho);
-            y = tip.y() - barb * Math.sin(rho);
-            gc.strokeLine(tip.x(), tip.y(), x, y);
-            rho = theta - phi;
-        }
-    }
 }
