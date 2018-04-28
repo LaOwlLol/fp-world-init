@@ -42,6 +42,10 @@ public class Graph {
         this.voronoiSites = voronoiSites;
     }
 
+    public void addSite(Point point) {
+        voronoiSites.add(point);
+    }
+
     public Graph() {
         this.vertices = new HashSet<>();
         this.faces = new HashSet<>();
@@ -75,4 +79,5 @@ public class Graph {
             this.voronoiSites = new ArrayList<>();
         }
     }
+
 }

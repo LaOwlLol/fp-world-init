@@ -3,7 +3,9 @@ package com.fauxpas.io;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
+import com.fauxpas.geometry.Vertex;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -14,17 +16,27 @@ import java.nio.file.StandardOpenOption;
 
 public class GraphFile {
 
-    private static final String SITE_KEY = "SITES";
+    private static final String SITES_KEY = "SITES";
+    private static final String HALFEDGES_KEY = "HALFEDGES";
+    private static final int HALFEDGES_STATE = 0;
+    private static final int SITES_STATE = 1;
+    private static final int FAILED_READ_PROC = -1;
+    private static final int LINE_SKIP_PROC = 0;
+    private static final int SUCCESS_READ_PROC = 1;
+    private Charset charset;
     private Path filePath;
+    private int readState;
     private boolean overWrite;
 
     public GraphFile(Path filePath) {
-        this.filePath = filePath;
+        setFilePath( filePath );
+        setCharset( Charset.forName("US-ASCII") );
+        setReadState(FAILED_READ_PROC);
     }
 
     public GraphFile(String filePath, boolean overWrite) {
         this(Paths.get(filePath));
-        this.overWrite = overWrite;
+        setOverWrite(overWrite);
     }
 
     public GraphFile(String filePath) {
@@ -47,7 +59,7 @@ public class GraphFile {
         this.filePath = filePath;
     }
 
-    public boolean isOverWrite() {
+    public boolean OverWrite() {
         return overWrite;
     }
 
@@ -55,48 +67,142 @@ public class GraphFile {
         this.overWrite = overWrite;
     }
 
+    private Charset getCharset() {
+        return charset;
+    }
+
+    private void setCharset(Charset charset) {
+        this.charset = charset;
+    }
+
+    private int getReadState() {
+        return readState;
+    }
+
+    private void setReadState(int readState) {
+        this.readState = readState;
+    }
+
+    public Graph read() {
+        Graph graph = new Graph();
+
+        try (BufferedReader reader = Files.newBufferedReader(getFilePath(), getCharset())) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                processLine(line, graph);
+            }
+        } catch (IOException x) {
+            System.err.format("IOException: %s%n", x);
+        }
+
+        return graph;
+    }
+
+    private int processLine(String line, Graph graph) {
+
+        if (getReadState() == FAILED_READ_PROC) {
+            return FAILED_READ_PROC;
+        }
+
+        if (line.equals(HALFEDGES_KEY)) {
+            setReadState(HALFEDGES_STATE);
+            return SUCCESS_READ_PROC;
+        }
+        else if (line.equals(SITES_KEY)) {
+            setReadState(SITES_STATE);
+            return SUCCESS_READ_PROC;
+        }
+
+        if (getReadState() == SITES_STATE) {
+            return processSite(line, graph);
+        }
+        else if (getReadState() == HALFEDGES_STATE) {
+            return processHalfEdge(line, graph);
+        }
+        return LINE_SKIP_PROC;
+    }
+
+    private int processHalfEdge(String line, Graph graph) {
+
+        try {
+            String[] verts = line.split(">");
+            String[] p1 = verts[0].split(",");
+            String[] p2 = verts[1].split(",");
+
+            HalfEdge v = new HalfEdge(new Vertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1]))));
+            HalfEdge w = new HalfEdge(new Vertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1]))));
+
+            v.setTwin(w);
+            w.setTwin(v);
+
+            graph.addHalfEdge(v);
+            graph.addHalfEdge(w);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return FAILED_READ_PROC;
+        }
+
+        return SUCCESS_READ_PROC;
+    }
+
+    private int processSite(String line, Graph graph) {
+        try {
+            String[] coords = line.split(",");
+            graph.addSite(new Point(Double.parseDouble(coords[0]), Double.parseDouble(coords[1])));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return FAILED_READ_PROC;
+        }
+        return SUCCESS_READ_PROC;
+    }
+
     public boolean write(Graph graph) {
 
         StringBuilder data = new StringBuilder();
 
-        for (HalfEdge h: graph.getEdges()) {
-            data.append(h.Origin().getCoordinates().x()).append(",").append(h.Origin().getCoordinates().y());
-            data.append(">");
-            data.append(h.Destination().getCoordinates().x()).append(",").append(h.Destination().getCoordinates().y());
-            data.append("\n");
-        }
+        data.append(HALFEDGES_KEY).append("\n");
+        data.append(graphEdgesToString(graph));
 
-        data.append(SITE_KEY+"\n");
-        for (Point s: graph.getSites()) {
-            data.append(s.x()).append(",").append(s.y()).append("\n");
-        }
+        data.append(SITES_KEY).append("\n");
+        data.append(graphSitesToString(graph));
 
-        if (!Files.isDirectory(filePath.getParent())) {
-            System.err.format("IOException no such directory: %s", filePath.getParent() );
+        if (!checkParentDirExists()) {
             return false;
         }
 
-        if (overWrite) {
+        if (OverWrite()) {
             return write(data.toString(), StandardOpenOption.TRUNCATE_EXISTING);
         }
         else {
-            int count = 1;
-            while (Files.isRegularFile(filePath)) {
-                incrementFilename(count);
-                count++;
-            }
+            generateAvailablePath();
             return write(data.toString(), StandardOpenOption.CREATE_NEW);
         }
 
     }
 
+    private void generateAvailablePath() {
+        int count = 1;
+        while (Files.isRegularFile(getFilePath())) {
+            incrementFilename(count);
+            count++;
+        }
+    }
+
+    private boolean checkParentDirExists() {
+        if (!Files.isDirectory(getFilePath().getParent())) {
+            System.err.format("IOException no such directory: %s", getFilePath().getParent() );
+            return false;
+        }
+        return true;
+    }
+
     private boolean write(String data, StandardOpenOption option) {
 
-        Charset charset = Charset.forName("US-ASCII");
-
         try (BufferedWriter writer = Files.newBufferedWriter(
-                filePath,
-                charset, StandardOpenOption.CREATE, option)) {
+                getFilePath(),
+                getCharset(), StandardOpenOption.CREATE, option)) {
             writer.write(data, 0, data.length());
         }
         catch (IOException x) {
@@ -107,17 +213,35 @@ public class GraphFile {
         return true;
     }
 
+    private String graphEdgesToString(Graph graph) {
+        StringBuilder data = new StringBuilder();
+        for (HalfEdge h: graph.getEdges()) {
+            data.append(h.Origin().getCoordinates().x()).append(",").append(h.Origin().getCoordinates().y());
+            data.append(">");
+            data.append(h.Destination().getCoordinates().x()).append(",").append(h.Destination().getCoordinates().y());
+            data.append("\n");
+        }
+        return data.toString();
+    }
+
+    private String graphSitesToString(Graph graph) {
+        StringBuilder data = new StringBuilder();
+        for (Point s: graph.getSites()) {
+            data.append(s.x()).append(",").append(s.y()).append("\n");
+        }
+        return data.toString();
+    }
+
     private void incrementFilename(int count) {
         StringBuilder sb = new StringBuilder();
         if (count > 1) {
-            sb.append(this.filePath.toString().substring(0, filePath.toString().length()-1));
+            sb.append(getFilePath().toString().substring(0, getFilePath().toString().length()-1));
         }
         else {
-            sb.append(this.filePath.toString());
+            sb.append(getFilePath().toString());
         }
         sb.append(count);
-        this.filePath = Paths.get(sb.toString());
+        setFilePath( Paths.get(sb.toString()) );
     }
-
 
 }
