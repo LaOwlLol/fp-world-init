@@ -82,7 +82,6 @@ public class VoronoiSample extends Application {
             }
         });
 
-
         root.getChildren().add(canvas);
         root.getChildren().add(save);
 
@@ -92,23 +91,7 @@ public class VoronoiSample extends Application {
         voronoi.addEvents(sites);
         voronoi.init();
 
-
-        AnimationTimer processor = new AnimationTimer() {
-
-            @Override
-            public void handle(long now) {
-
-                if (voronoi.hasNextEvent()) {
-                    voronoi.processNextEvent();
-                    //drawSweepLine(gc);
-                }
-                else if (!voronoi.isFinal()) {
-                    voronoi.finishBreakPoints();
-                    this.stop();
-                }
-
-            }
-        };
+        AnimationTimer processor = voronoi.getProcessAnimator();
         processor.start();
 
         AnimationTimer animation = graphRenderer.getAnimation(voronoi.getGraph());

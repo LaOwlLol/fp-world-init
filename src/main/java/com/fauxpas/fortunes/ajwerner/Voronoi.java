@@ -27,6 +27,7 @@ import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
 import com.fauxpas.geometry.Vertex;
+import javafx.animation.AnimationTimer;
 
 import java.util.*;
 
@@ -105,6 +106,25 @@ public class Voronoi {
                 handleCircleEvent(ce);
             }
         }
+    }
+
+    public AnimationTimer getProcessAnimator() {
+        return new AnimationTimer() {
+
+            @Override
+            public void handle(long now) {
+
+                if (hasNextEvent()) {
+                    processNextEvent();
+                    //drawSweepLine(gc);
+                }
+                else if (!isFinal()) {
+                    finishBreakPoints();
+                    this.stop();
+                }
+
+            }
+        };
     }
 
     /**
