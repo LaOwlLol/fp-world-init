@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class VoronoiSample extends Application {
+public class GeneratorSample extends Application {
 
     Voronoi voronoi;
     GraphRenderer graphRenderer;
@@ -39,7 +39,7 @@ public class VoronoiSample extends Application {
     double width;
     double height;
 
-    public VoronoiSample() {
+    public GeneratorSample() {
 
         this.padding = 100;
         this.width = 1024;
@@ -49,7 +49,7 @@ public class VoronoiSample extends Application {
     }
 
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Graph Voronoi Test");
+        primaryStage.setTitle("Generate Voronoi Test");
 
         Group root = new Group();
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());

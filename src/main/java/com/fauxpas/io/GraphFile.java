@@ -86,15 +86,20 @@ public class GraphFile {
     public Graph read() {
         Graph graph = new Graph();
 
+        setReadState(SUCCESS_READ_PROC);
+
         try (BufferedReader reader = Files.newBufferedReader(getFilePath(), getCharset())) {
             String line = null;
             while ((line = reader.readLine()) != null) {
+                //System.out.println("read:"+line);
                 processLine(line, graph);
             }
         } catch (IOException x) {
             System.err.format("IOException: %s%n", x);
         }
 
+        System.out.println("finished");
+        setReadState(FAILED_READ_PROC);
         return graph;
     }
 
@@ -130,7 +135,7 @@ public class GraphFile {
             String[] p2 = verts[1].split(",");
 
             HalfEdge v = new HalfEdge(new Vertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1]))));
-            HalfEdge w = new HalfEdge(new Vertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1]))));
+            HalfEdge w = new HalfEdge(new Vertex(new Point(Double.parseDouble(p2[0]), Double.parseDouble(p2[1]))));
 
             v.setTwin(w);
             w.setTwin(v);
