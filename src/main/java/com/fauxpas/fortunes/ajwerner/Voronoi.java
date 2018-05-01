@@ -30,16 +30,15 @@ import com.fauxpas.geometry.Vertex;
 import javafx.animation.AnimationTimer;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Created by ajwerner on 12/23/13.
+ * Original class created by ajwerner on 12/23/13.
+ * Modiftied by laowllol (Nate G.) in April 2018.
  */
 public class Voronoi {
 
-    // TODO fix min/max dim to match height of canvas.
-    private static final double MAX_DIM = 10;
-    private static final double MIN_DIM = -10;
-
+    ArrayList<Point> sites;
     private final ArrayList<VoronoiEdge> edgeList;
     private HashSet<BreakPoint> breakPoints;
     private TreeMap<ArcKey, CircleEvent> arcs;
@@ -47,15 +46,70 @@ public class Voronoi {
     private Graph graph;
     private boolean finished;
     private double sweepLoc;
+    private double padding;
+    private double width;
+    private double height;
 
 
-    public Voronoi() {
+    public Voronoi(double _width, double _height, double _padding) {
         // initialize data structures;
         edgeList = new ArrayList<VoronoiEdge>();
         events = new TreeSet<Event>();
         breakPoints = new HashSet<BreakPoint>();
         arcs = new TreeMap<ArcKey, CircleEvent>();
         graph = new Graph();
+        this.width = _width;
+        this.height = _height;
+        this.padding = _padding;
+    }
+
+    public Graph getGraph() {
+        return graph;
+    }
+
+    public ArrayList<VoronoiEdge> getEdgeList() {
+        return edgeList;
+    }
+
+    /**
+     * provide a list of sites for the graph
+     *
+     * Pre Condition unprocessed voronoi graph.
+     * @param sites list of site to use.
+     */
+    public void setSites(ArrayList<Point> sites) {
+        graph.setSites(sites);
+    }
+
+    /**
+     * choose a list of sites on a plane.
+     */
+    public void generateSites() {
+        double low = padding;
+        double x_max = width - padding;
+        double y_max = height - padding;
+
+        for (int i = 0; i < 400; i++) {
+            this.graph.addSite(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
+                    ThreadLocalRandom.current().nextDouble(low, y_max)));
+        }
+    }
+
+    /**
+     * enqueue initial events from sites.
+     */
+    public void initEvents() {
+        for (Point site : graph.getSites()) {
+            events.add(new Event(site));
+        }
+    }
+
+    /**
+     * Get this Voronoi object ready for processing
+     */
+    public void initProcessing() {
+        sweepLoc = height;
+        finished = false;
     }
 
     public boolean hasNextEvent() {
@@ -71,25 +125,6 @@ public class Voronoi {
      *
      * @param siteList a list of Points.
      */
-    public void addEvents(ArrayList<Point> siteList) {
-        graph.setSites(siteList);
-        for (Point site : siteList) {
-            events.add(new Event(site));
-        }
-    }
-
-    /**
-     * Get this Voronoi object ready for processing
-     * ie:
-     * 1. set the sweepline to the initial position
-     *
-     * //TODO anything else?
-     */
-    public void init() {
-        sweepLoc = MAX_DIM;
-        finished = false;
-    }
-
 
     /**
      * Handle the next event.
@@ -108,6 +143,10 @@ public class Voronoi {
         }
     }
 
+    /**
+     * Construct a animation timer for iterating over events until finished processing.
+     * @return timer for animating graph processing.
+     */
     public AnimationTimer getProcessAnimator() {
         return new AnimationTimer() {
 
@@ -116,7 +155,6 @@ public class Voronoi {
 
                 if (hasNextEvent()) {
                     processNextEvent();
-                    //drawSweepLine(gc);
                 }
                 else if (!isFinal()) {
                     finishBreakPoints();
@@ -128,10 +166,10 @@ public class Voronoi {
     }
 
     /**
-     *
+     * Finalize the graph.
      */
     public void finishBreakPoints() {
-        this.sweepLoc = MIN_DIM; // hack to draw negative infinite points
+        this.sweepLoc = 0;
         for (BreakPoint bp : breakPoints) {
             bp.finish(graph);
         }
@@ -281,15 +319,4 @@ public class Voronoi {
         }
     }
 
-    public ArrayList<VoronoiEdge> getEdgeList() {
-        return edgeList;
-    }
-
-    public HashSet<HalfEdge> getEdges() {
-        return graph.getEdges();
-    }
-
-    public Graph getGraph() {
-        return graph;
-    }
 }

@@ -21,7 +21,6 @@ public class GraphRenderer {
 
     public AnimationTimer getAnimation(Graph graph) {
          return new AnimationTimer() {
-
             private long count = 0;
 
             @Override
@@ -29,9 +28,7 @@ public class GraphRenderer {
                 if (count%10 == 0) {
                     graphicsContext.clearRect(0, 0, width, height);
                     drawGraph(graph);
-
                 }
-
                 count++;
             }
         };

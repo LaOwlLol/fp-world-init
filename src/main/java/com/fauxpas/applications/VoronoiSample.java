@@ -32,35 +32,20 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class VoronoiSample extends Application {
 
-    private final double padding;
     Voronoi voronoi;
     GraphRenderer graphRenderer;
-    ArrayList<Point> sites;
+    Button save;
+    double padding;
     double width;
     double height;
-    Button save;
-
 
     public VoronoiSample() {
 
+        this.padding = 100;
         this.width = 1024;
         this.height = 768;
-        this.padding = 100;
-        this.sites = new ArrayList<>();
 
-
-        double low = padding;
-        double x_max = width - padding;
-        double y_max = height - padding;
-
-        for (int i = 0; i < 400; i++) {
-            this.sites.add(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
-                    ThreadLocalRandom.current().nextDouble(low, y_max)));
-            //sites.add(new Point(rnd.nextDouble(), rnd.nextDouble()));
-        }
-
-        this.voronoi = new Voronoi();
-
+        this.voronoi = new Voronoi(width, height, padding);
     }
 
     public void start(Stage primaryStage) {
@@ -88,8 +73,9 @@ public class VoronoiSample extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
-        voronoi.addEvents(sites);
-        voronoi.init();
+        voronoi.generateSites();
+        voronoi.initEvents();
+        voronoi.initProcessing();
 
         AnimationTimer processor = voronoi.getProcessAnimator();
         processor.start();
