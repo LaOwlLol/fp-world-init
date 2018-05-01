@@ -73,7 +73,7 @@ public class VoronoiSample extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
-        voronoi.generateSites();
+        voronoi.generateSites(400);
         voronoi.initEvents();
         voronoi.initProcessing();
 

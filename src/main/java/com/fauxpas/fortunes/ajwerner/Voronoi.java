@@ -84,12 +84,12 @@ public class Voronoi {
     /**
      * choose a list of sites on a plane.
      */
-    public void generateSites() {
+    public void generateSites(int count) {
         double low = padding;
         double x_max = width - padding;
         double y_max = height - padding;
 
-        for (int i = 0; i < 400; i++) {
+        for (int i = 0; i < count; i++) {
             this.graph.addSite(new Point(ThreadLocalRandom.current().nextDouble(low, x_max),
                     ThreadLocalRandom.current().nextDouble(low, y_max)));
         }
