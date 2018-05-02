@@ -27,5 +27,14 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-mainClassName = "com.fauxpas.applications.GeneratorSample"
+task generator(type: JavaExec){
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.fauxpas.applications.GeneratorSample'
+}
+
+task view(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.fauxpas.applications.ViewerSample'
+}
+
 
