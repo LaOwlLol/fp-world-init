@@ -101,15 +101,7 @@ public class ViewerSample extends Application {
             return null;
         }
 
-        int i = 0;
-        for (Vertex v: graph.getVertices()) {
-            if (i == n) {
-                return v;
-            }
-            i++;
-        }
-
-        return null;
+        return graph.getVertex(n);
     }
 
     private void toggleVertFocus(Vertex v, boolean focus) {

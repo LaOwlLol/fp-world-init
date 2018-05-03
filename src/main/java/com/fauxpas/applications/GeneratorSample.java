@@ -1,6 +1,8 @@
 package com.fauxpas.applications;
 
 import com.fauxpas.fortunes.ajwerner.Voronoi;
+import com.fauxpas.geometry.HalfEdge;
+import com.fauxpas.geometry.Vertex;
 import com.fauxpas.io.GraphFile;
 import com.fauxpas.io.GraphRenderer;
 import javafx.animation.AnimationTimer;
@@ -16,6 +18,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class GeneratorSample extends Application {
 
     Voronoi voronoi;
@@ -28,6 +32,8 @@ public class GeneratorSample extends Application {
     private Button regen;
     private AnimationTimer processor;
     private AnimationTimer animation;
+    private Vertex currentVert;
+    private Button nextVert;
 
     public GeneratorSample() {
         this.padding = 100;
@@ -71,10 +77,22 @@ public class GeneratorSample extends Application {
             }
         });
 
+        currentVert = null;
+        nextVert = new Button(">>");
+        nextVert.setLayoutX( 5* (padding/6));
+        nextVert.setLayoutY(height - (padding/2));
+        nextVert.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                selectNextVert();
+            }
+        });
+
         root.getChildren().add(canvas);
         root.getChildren().add(save);
         root.getChildren().add(saveName);
         root.getChildren().add(regen);
+        root.getChildren().add(nextVert);
 
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
@@ -105,6 +123,38 @@ public class GeneratorSample extends Application {
         if (processor != null) {
             processor.stop();
             processor = null;
+        }
+    }
+
+    private void selectNextVert() {
+        if (!voronoi.isFinal()) {
+            return;
+        }
+
+        toggleVertFocus(currentVert, false);
+        currentVert = getNthVert(ThreadLocalRandom.current().nextInt(0, voronoi.getGraph().getVertices().size()));
+        toggleVertFocus(currentVert, true);
+
+    }
+
+    private Vertex getNthVert(int n) {
+        if (!voronoi.isFinal()) {
+            return null;
+        }
+
+        return voronoi.getGraph().getVertex(n);
+    }
+
+    private void toggleVertFocus(Vertex v, boolean focus) {
+        if (!voronoi.isFinal()) {
+            return;
+        }
+
+        if (v != null) {
+            v.setFocused(focus);
+            for (HalfEdge h: voronoi.getGraph().neighboringHalfEdges(v)) {
+                h.setFocused(focus);
+            }
         }
     }
 

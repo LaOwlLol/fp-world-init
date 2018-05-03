@@ -203,7 +203,7 @@ public class Voronoi {
 
             newEdge.setP1( new Point((cur.p.x() + arcAbove.site.x())/2, Double.POSITIVE_INFINITY) );
 
-            Vertex vert = new Vertex(newEdge.getP1());
+            Vertex vert = graph.getVertex(newEdge.getP1());
             graph.addVertex(vert);
             w.setOrigin(vert);
             vert.setIncidentHalfEdge(w);
@@ -294,14 +294,14 @@ public class Voronoi {
         boolean isLeftPoint = (turnsLeft) ? (e.m < 0) : (e.m > 0);
         if (isLeftPoint) {
             e.setP1(ce.vert);
-            Vertex vert = new Vertex(ce.vert);
+            Vertex vert = graph.getVertex(ce.vert);
             graph.addVertex(vert);
             w.setOrigin(vert);
             vert.setIncidentHalfEdge(w);
         }
         else {
             e.setP2(ce.vert);
-            Vertex vert = new Vertex(ce.vert);
+            Vertex vert = graph.getVertex(ce.vert);
             graph.addVertex(vert);
             v.setOrigin(vert);
             vert.setIncidentHalfEdge(v);
