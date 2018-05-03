@@ -22,6 +22,17 @@ public class Graph {
         return edges;
     }
 
+    //TODO there has got to be a better way to to this.
+    public HashSet<HalfEdge> neighboringHalfEdges(Vertex v){
+        HashSet<HalfEdge> results = new HashSet<>();
+        for (HalfEdge h: edges) {
+            if (h.Origin().equals(v)) {
+                results.add(h);
+            }
+        }
+        return results;
+    }
+
     public void addVertex(Vertex v) {
         this.vertices.add(v);
     }

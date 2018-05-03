@@ -61,11 +61,17 @@ public class BreakPoint {
     public void finish(Point vert, Graph g) {
         if (isEdgeLeft) {
             this.e.setP1(vert);
-            this.in.setOrigin(new Vertex(vert));
+            Vertex v = new Vertex(vert);
+            g.addVertex(v);
+            this.in.setOrigin(v);
+            v.setIncidentHalfEdge(this.in);
         }
         else {
             this.e.setP2(vert);
-            this.out.setOrigin(new Vertex(vert));
+            Vertex v = new Vertex(vert);
+            g.addVertex(v);
+            this.out.setOrigin(v);
+            v.setIncidentHalfEdge(this.out);
         }
 
         //g.addHalfEdge(in);
@@ -76,11 +82,17 @@ public class BreakPoint {
         Point p = this.getPoint();
         if (isEdgeLeft) {
             this.e.setP1(p);
-            this.in.setOrigin(new Vertex(p));
+            Vertex v = new Vertex(p);
+            g.addVertex(v);
+            this.in.setOrigin(v);
+            v.setIncidentHalfEdge(this.in);
         }
         else {
             this.e.setP2(p);
-            this.out.setOrigin(new Vertex(p));
+            Vertex v = new Vertex(p);
+            g.addVertex(v);
+            this.out.setOrigin(v);
+            v.setIncidentHalfEdge(this.out);
         }
 
         //g.addHalfEdge(in);

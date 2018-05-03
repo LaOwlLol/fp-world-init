@@ -39,7 +39,9 @@ public class GeneratorSample extends Application {
         primaryStage.setTitle("Generate Voronoi Test");
 
         Group root = new Group();
+
         Canvas canvas = new Canvas(new Double(this.width).intValue(), new Double(this.height).intValue());
+
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         this.graphRenderer = new GraphRenderer(gc, width, height);

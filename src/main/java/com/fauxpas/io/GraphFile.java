@@ -18,11 +18,13 @@ public class GraphFile {
 
     private static final String SITES_KEY = "SITES";
     private static final String HALFEDGES_KEY = "HALFEDGES";
+    private static final String NEW_LINE = "\n";
     private static final int HALFEDGES_STATE = 0;
     private static final int SITES_STATE = 1;
     private static final int FAILED_READ_PROC = -1;
     private static final int LINE_SKIP_PROC = 0;
     private static final int SUCCESS_READ_PROC = 1;
+
     private Charset charset;
     private Path filePath;
     private int readState;
@@ -134,14 +136,23 @@ public class GraphFile {
             String[] p1 = verts[0].split(",");
             String[] p2 = verts[1].split(",");
 
-            HalfEdge v = new HalfEdge(new Vertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1]))));
-            HalfEdge w = new HalfEdge(new Vertex(new Point(Double.parseDouble(p2[0]), Double.parseDouble(p2[1]))));
+            Vertex o1 = new Vertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1])));
+            HalfEdge v = new HalfEdge(o1);
+
+            Vertex o2 = new Vertex(new Point(Double.parseDouble(p2[0]), Double.parseDouble(p2[1])));
+            HalfEdge w = new HalfEdge(o2);
+
+
+            o1.setIncidentHalfEdge(v);
+            o2.setIncidentHalfEdge(w);
 
             v.setTwin(w);
             w.setTwin(v);
 
             graph.addHalfEdge(v);
             graph.addHalfEdge(w);
+            graph.addVertex(o1);
+            graph.addVertex(o2);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -167,10 +178,10 @@ public class GraphFile {
 
         StringBuilder data = new StringBuilder();
 
-        data.append(HALFEDGES_KEY).append("\n");
+        data.append(HALFEDGES_KEY).append(NEW_LINE);
         data.append(graphEdgesToString(graph));
 
-        data.append(SITES_KEY).append("\n");
+        data.append(SITES_KEY).append(NEW_LINE);
         data.append(graphSitesToString(graph));
 
         if (!checkParentDirExists()) {

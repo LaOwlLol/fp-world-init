@@ -3,6 +3,7 @@ package com.fauxpas.io;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Point;
+import com.fauxpas.geometry.Vertex;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -10,13 +11,15 @@ import javafx.scene.paint.Color;
 public class GraphRenderer {
     private GraphicsContext graphicsContext;
     private double width, height;
-    int pointRadius;
+    int siteRadius;
+    int vertRadius;
 
     public GraphRenderer(GraphicsContext _graphicsContext, double _width, double _height) {
         this.graphicsContext = _graphicsContext;
         this.width = _width;
         this.height = _height;
-        this.pointRadius = 5;
+        this.siteRadius = 4;
+        this.vertRadius = 6;
     }
 
     public AnimationTimer getAnimation(Graph graph) {
@@ -36,26 +39,39 @@ public class GraphRenderer {
 
     public void drawGraph(Graph graph) {
         drawSites(graph);
+        drawVertices(graph);
         drawEdges(graph);
     }
 
     public void drawSites(Graph graph) {
-        for (Point _v: graph.getSites()) {
-            graphicsContext.fillOval(_v.x()-(this.pointRadius/2),
-                    _v.y()-(this.pointRadius/2),
-                    this.pointRadius,
-                    this.pointRadius);
+        for (Point p: graph.getSites()) {
+          drawDot(p, this.siteRadius);
         }
     }
 
+    public void drawVertices(Graph graph) {
+        graphicsContext.setFill(Color.MEDIUMAQUAMARINE);
+        for (Vertex v: graph.getVertices()) {
+            drawDot(v.getCoordinates(), this.vertRadius);
+        }
+        graphicsContext.setFill(Color.BLACK);
+    }
+
     public void drawEdges(Graph graph) {
-        graphicsContext.setStroke(Color.CORNFLOWERBLUE);
+        graphicsContext.setStroke(Color.CORAL);
         for (HalfEdge edge: graph.getEdges()) {
             if (edge.Origin() != null && edge.Destination() != null) {
-                drawArrow(edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
+                drawLine(edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
             }
         }
         graphicsContext.setStroke(Color.BLACK);
+    }
+
+    public void drawDot(Point p, int radius) {
+        graphicsContext.fillOval(p.x()-(radius/2),
+                p.y()-(radius/2),
+                radius,
+                radius);
     }
 
     public void drawLine(Point p1, Point p2) {
