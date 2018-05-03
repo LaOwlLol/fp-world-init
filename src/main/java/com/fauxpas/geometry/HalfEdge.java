@@ -7,6 +7,7 @@ public class HalfEdge {
     private HalfEdge next;
     private HalfEdge prev;
     private Face incidentFace;
+    private boolean focused;
 
     public Vertex Origin() {
         return origin;
@@ -57,10 +58,21 @@ public class HalfEdge {
         this.incidentFace = incidentFace;
     }
 
-    public HalfEdge() {}
+    public boolean isFocused() {
+        return focused;
+    }
+
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
+    public HalfEdge() {
+        this.focused = false;
+    }
 
     public HalfEdge(Vertex origin) {
         this.origin = origin;
+        this.focused = false;
     }
 
     public HalfEdge(Vertex origin, HalfEdge twin) {

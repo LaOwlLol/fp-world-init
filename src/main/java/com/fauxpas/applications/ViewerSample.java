@@ -1,6 +1,8 @@
 package com.fauxpas.applications;
 
 import com.fauxpas.geometry.Graph;
+import com.fauxpas.geometry.HalfEdge;
+import com.fauxpas.geometry.Vertex;
 import com.fauxpas.io.GraphFile;
 import com.fauxpas.io.GraphRenderer;
 import javafx.animation.AnimationTimer;
@@ -15,6 +17,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 public class ViewerSample extends Application {
 
     GraphRenderer graphRenderer;
@@ -25,6 +30,8 @@ public class ViewerSample extends Application {
     private Graph graph;
     private TextField saveName;
     private AnimationTimer drawTimer;
+    private Vertex currentVert;
+    private Button nextVert;
 
     public ViewerSample() {
         this.padding = 100;
@@ -52,20 +59,70 @@ public class ViewerSample extends Application {
         load = new Button("load");
         load.setLayoutX(width- padding/2);
         load.setLayoutY(height - padding/2);
-
         load.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadGraph();
             }
         });
 
+        currentVert = null;
+        nextVert = new Button(">>");
+        nextVert.setLayoutY(height - (padding/2));
+        nextVert.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                selectNextVert();
+            }
+        });
+
         root.getChildren().add(canvas);
         root.getChildren().add(load);
         root.getChildren().add(saveName);
+        root.getChildren().add(nextVert);
 
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
+    }
+
+    private void selectNextVert() {
+        if (graph == null) {
+            return;
+        }
+
+        toggleVertFocus(currentVert, false);
+        currentVert = getNthVert(ThreadLocalRandom.current().nextInt(0, graph.getVertices().size()));
+        toggleVertFocus(currentVert, true);
+
+    }
+
+    private Vertex getNthVert(int n) {
+        if (graph == null) {
+            return null;
+        }
+
+        int i = 0;
+        for (Vertex v: graph.getVertices()) {
+            if (i == n) {
+                return v;
+            }
+            i++;
+        }
+
+        return null;
+    }
+
+    private void toggleVertFocus(Vertex v, boolean focus) {
+        if (graph == null) {
+            return;
+        }
+
+        if (v != null) {
+            v.setFocused(focus);
+            for (HalfEdge h: graph.neighboringHalfEdges(v)) {
+                h.setFocused(focus);
+            }
+        }
     }
 
     private void stopDraw() {

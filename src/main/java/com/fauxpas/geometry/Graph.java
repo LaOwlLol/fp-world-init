@@ -26,7 +26,7 @@ public class Graph {
     public HashSet<HalfEdge> neighboringHalfEdges(Vertex v){
         HashSet<HalfEdge> results = new HashSet<>();
         for (HalfEdge h: edges) {
-            if (h.Origin().equals(v)) {
+            if (h.Origin().equals(v) || h.Destination().equals(v)) {
                 results.add(h);
             }
         }

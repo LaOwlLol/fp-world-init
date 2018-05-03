@@ -14,6 +14,8 @@ public class Vertex {
      */
     private HalfEdge incidentHalfEdge;
 
+    private boolean focused;
+
     public Point getCoordinates() {
         return coordinates;
     }
@@ -34,12 +36,21 @@ public class Vertex {
         this.incidentHalfEdge = incidentHalfEdge;
     }
 
-    public Vertex( Point coordinates, HalfEdge incidentHalfEdge) {
+    public boolean isFocused() {
+        return focused;
+    }
+
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
+    public Vertex(Point coordinates, HalfEdge incidentHalfEdge) {
         this(coordinates);
         this.setIncidentHalfEdge(incidentHalfEdge);
     }
 
     public Vertex(Point coordinates) {
         this.coordinates = coordinates;
+        this.focused = false;
     }
 }

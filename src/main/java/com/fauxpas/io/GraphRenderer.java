@@ -13,13 +13,20 @@ public class GraphRenderer {
     private double width, height;
     int siteRadius;
     int vertRadius;
+    int focusedVertRadius;
+    double focusedEdgeThickness;
+    private double defaultLineThickness;
 
     public GraphRenderer(GraphicsContext _graphicsContext, double _width, double _height) {
         this.graphicsContext = _graphicsContext;
+        this.defaultLineThickness = graphicsContext.getLineWidth();
+        this.focusedEdgeThickness = this.defaultLineThickness + Math.max(1, this.defaultLineThickness*2);
         this.width = _width;
         this.height = _height;
         this.siteRadius = 4;
         this.vertRadius = 6;
+        this.focusedVertRadius = 8;
+
     }
 
     public AnimationTimer getAnimation(Graph graph) {
@@ -52,7 +59,14 @@ public class GraphRenderer {
     public void drawVertices(Graph graph) {
         graphicsContext.setFill(Color.MEDIUMAQUAMARINE);
         for (Vertex v: graph.getVertices()) {
-            drawDot(v.getCoordinates(), this.vertRadius);
+            if (v.isFocused()) {
+                graphicsContext.setFill(Color.DARKBLUE);
+                drawDot(v.getCoordinates(), this.focusedVertRadius);
+                graphicsContext.setFill(Color.MEDIUMAQUAMARINE);
+            }
+            else {
+                drawDot(v.getCoordinates(), this.vertRadius);
+            }
         }
         graphicsContext.setFill(Color.BLACK);
     }
@@ -61,7 +75,16 @@ public class GraphRenderer {
         graphicsContext.setStroke(Color.CORAL);
         for (HalfEdge edge: graph.getEdges()) {
             if (edge.Origin() != null && edge.Destination() != null) {
-                drawLine(edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
+                if (edge.isFocused()) {
+                    graphicsContext.setStroke(Color.RED);
+                    graphicsContext.setLineWidth(focusedEdgeThickness);
+                    drawLine(edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
+                    graphicsContext.setLineWidth(defaultLineThickness);
+                    graphicsContext.setStroke(Color.CORAL);
+                }
+                else {
+                    drawLine(edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
+                }
             }
         }
         graphicsContext.setStroke(Color.BLACK);
