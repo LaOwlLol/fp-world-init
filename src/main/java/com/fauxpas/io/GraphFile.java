@@ -136,10 +136,10 @@ public class GraphFile {
             String[] p1 = verts[0].split(",");
             String[] p2 = verts[1].split(",");
 
-            Vertex o1 = new Vertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1])));
+            Vertex o1 = graph.getVertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1])));
             HalfEdge v = new HalfEdge(o1);
 
-            Vertex o2 = new Vertex(new Point(Double.parseDouble(p2[0]), Double.parseDouble(p2[1])));
+            Vertex o2 = graph.getVertex(new Point(Double.parseDouble(p2[0]), Double.parseDouble(p2[1])));
             HalfEdge w = new HalfEdge(o2);
 
 
