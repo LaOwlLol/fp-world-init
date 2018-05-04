@@ -53,7 +53,7 @@ public class VoronoiEdge {
     public VoronoiEdge(Point site1, Point site2) {
         this.site1 = site1;
         this.site2 = site2;
-        isVertical = (site1.y() == site2.y()) ? true : false;
+        isVertical = Double.compare(site1.y(), site2.y()) == 0;
         if (isVertical) m = b = 0;
         else {
             m = -1.0 / ((site1.y() - site2.y()) / (site1.x() - site2.x()));
@@ -63,7 +63,10 @@ public class VoronoiEdge {
     }
 
     public Point intersection(VoronoiEdge that) {
-        if (this.m == that.m && this.b != that.b && this.isVertical == that.isVertical) return null; // no intersection
+        if (Double.compare(this.m, that.m) == 0 &&
+                Double.compare(this.b, that.b) != 0 && this.isVertical == that.isVertical) {
+            return null; // no intersection
+        }
         double x, y;
         if (this.isVertical) {
             x = (this.site1.x()+ this.site2.x()) / 2;

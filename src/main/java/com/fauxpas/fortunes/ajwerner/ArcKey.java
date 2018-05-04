@@ -46,7 +46,7 @@ public abstract class ArcKey implements Comparable<ArcKey> {
             return 0;
         }
 
-        if (myLeft.x() == yourLeft.x() && myRight.x() == yourRight.x()) return 0;
+        if (Double.compare(myLeft.x(), yourLeft.x()) == 0 && Double.compare( myRight.x(), yourRight.x()) == 0) return 0;
         if (myLeft.x() >= yourRight.x()) return 1;
         if (myRight.x() <= yourLeft.x()) return -1;
 

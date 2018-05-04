@@ -192,7 +192,7 @@ public class Voronoi {
         Arc arcAbove = (Arc) arcEntryAbove.getKey();
 
         // Deal with the degenerate case where the first two points are at the same y value
-        if (arcs.size() == 0 && arcAbove.site.y() == cur.p.y()) {
+        if (arcs.size() == 0 && Double.compare(arcAbove.site.y(), cur.p.y()) == 0) {
             VoronoiEdge newEdge = new VoronoiEdge(arcAbove.site, cur.p);
             HalfEdge v = new HalfEdge();
             HalfEdge w = new HalfEdge();

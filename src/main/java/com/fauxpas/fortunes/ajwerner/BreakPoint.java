@@ -108,7 +108,7 @@ public class BreakPoint {
 
         double x,y;
         // Handle the vertical line case
-        if (s1.y() == s2.y()) {
+        if (Double.compare(s1.y(), s2.y()) == 0) {
             x = (s1.x() + s2.x()) / 2; // x coordinate is between the two sites
             // comes from parabola focus-directrix definition:
             y = (sq(x - s1.x()) + sq(s1.y()) - sq(l)) / (2* (s1.y() - l));

@@ -30,6 +30,14 @@
 
 package com.fauxpas.geometry;
 
+/**
+ * Note i think this may have been my Point class, and then i adopted most of ajwerner's
+ * methods (which originally lived in my FortuneHelpers class.
+ *
+ * I have definitely now re-written the compare to method, which orignally used == on doubles?
+ * this is is this okay? any way even if mine is slow hopefully it's an improvement.
+ */
+
 public class Point implements Comparable<Point>{
 
     private double x;
@@ -113,19 +121,30 @@ public class Point implements Comparable<Point>{
     public static int minYOrderedCompareTo(Point p1, Point p2) {
         if (p1.y < p2.y) return 1;
         if (p1.y > p2.y) return -1;
-        if (p1.x == p2.x) return 0;
+        if (Double.compare(p1.x, p2.x) == 0) return 0;
         return (p1.x < p2.x) ? -1 : 1;
     }
 
     @Override
     public int compareTo(Point o) {
-        if ((this.x == o.x) || (Double.isNaN(this.x) && Double.isNaN(o.x))) {
-            if (this.y == o.y) {
+
+        if ( Double.compare(this.x, o.x) == 0 || Double.isNaN(this.x) && Double.isNaN(o.x) ) {
+            if (Double.compare(this.y, o.y) == 0) {
                 return 0;
             }
-            return (this.y < o.y) ? -1 : 1;
+            if (this.y < o.y) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
         }
-        return (this.x < o.x) ? -1 : 1;
+
+        if (this.x < o.x) {
+            return -1;
+        }
+
+        return 1;
     }
 
 
