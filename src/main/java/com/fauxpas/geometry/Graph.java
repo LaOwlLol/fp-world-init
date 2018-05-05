@@ -24,16 +24,32 @@ public class Graph {
     }
 
     //TODO there has got to be a better way to to this.
-    public LinkedHashSet<HalfEdge> neighboringHalfEdges(Vertex v){
+    public LinkedHashSet<HalfEdge> outgoingHalfEdges(Vertex v){
         LinkedHashSet<HalfEdge> results = new LinkedHashSet<>();
         for (HalfEdge h: edges) {
-            if (h.Origin().equals(v) || h.Destination().equals(v)) {
+            if (h.Origin().equals(v)) {
                 results.add(h);
             }
         }
         return results;
     }
 
+    //TODO there has got to be a better way to to this.
+    public LinkedHashSet<HalfEdge> incomingHalfEdges(Vertex v){
+        LinkedHashSet<HalfEdge> results = new LinkedHashSet<>();
+        for (HalfEdge h: edges) {
+            if (h.Destination().equals(v)) {
+                results.add(h);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Add a vertex to the graph.
+     *
+     * @param v vertex to add (recommended to add complete record)
+     */
     public void addVertex(Vertex v) {
         this.vertices.add(v);
     }
@@ -56,12 +72,18 @@ public class Graph {
         return null;
     }
 
-    public Vertex getVertex(Point p) {
-        Vertex v = containsPointAsVertex(p);
+    /**
+     * Return a vertex for given location, returning a vertex of this graph if possible.
+     *
+     * @param loc  the location to return as a vertex.
+     * @return The vertex of this graph with given location or
+     */
+    public Vertex getVertex(Point loc) {
+        Vertex v = containsPointAsVertex(loc);
         if (v != null) {
             return v;
         }
-        return new Vertex(p);
+        return new Vertex(loc);
     }
 
     public boolean isVertex(Point p) {
@@ -83,6 +105,23 @@ public class Graph {
 
     public void addFace(Face f) {
         this.faces.add(f);
+    }
+
+    public Face getFace(Point loc) {
+        Face f = containsPointAsFace(loc);
+        if (f != null) {
+            return f;
+        }
+        return new Face(loc);
+    }
+
+    private Face containsPointAsFace(Point p) {
+        for (Face f: getFaces()) {
+            if (p.compareTo(f.getSite()) == 0) {
+                return f;
+            }
+        }
+        return null;
     }
 
     public ArrayList<Point> getSites() {

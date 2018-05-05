@@ -32,11 +32,14 @@ public class ViewerSample extends Application {
     private AnimationTimer drawTimer;
     private Vertex currentVert;
     private Button nextVert;
+    private boolean incomingToggle;
+    private Button inOut;
 
     public ViewerSample() {
         this.padding = 100;
         this.width = 1024;
         this.height = 768;
+        this.incomingToggle = false;
     }
 
     @Override
@@ -75,10 +78,22 @@ public class ViewerSample extends Application {
             }
         });
 
+        inOut = new Button("I/O");
+        inOut.setLayoutY(height - (padding/2)+50);
+        inOut.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                toggleVertFocus(currentVert, false);
+                incomingToggle = !incomingToggle;
+                toggleVertFocus(currentVert, true);
+            }
+        });
+
         root.getChildren().add(canvas);
         root.getChildren().add(load);
         root.getChildren().add(saveName);
         root.getChildren().add(nextVert);
+        root.getChildren().add(inOut);
 
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
@@ -111,8 +126,15 @@ public class ViewerSample extends Application {
 
         if (v != null) {
             v.setFocused(focus);
-            for (HalfEdge h: graph.neighboringHalfEdges(v)) {
-                h.setFocused(focus);
+            if (incomingToggle) {
+                for (HalfEdge h: graph.incomingHalfEdges(v)) {
+                    h.setFocused(focus);
+                }
+            }
+            else {
+                for (HalfEdge h : graph.outgoingHalfEdges(v)) {
+                    h.setFocused(focus);
+                }
             }
         }
     }

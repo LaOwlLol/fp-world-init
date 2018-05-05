@@ -152,7 +152,7 @@ public class GeneratorSample extends Application {
 
         if (v != null) {
             v.setFocused(focus);
-            for (HalfEdge h: voronoi.getGraph().neighboringHalfEdges(v)) {
+            for (HalfEdge h: voronoi.getGraph().outgoingHalfEdges(v)) {
                 h.setFocused(focus);
             }
         }

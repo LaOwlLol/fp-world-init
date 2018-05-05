@@ -23,10 +23,7 @@
 
 package com.fauxpas.fortunes.ajwerner;
 
-import com.fauxpas.geometry.Graph;
-import com.fauxpas.geometry.HalfEdge;
-import com.fauxpas.geometry.Point;
-import com.fauxpas.geometry.Vertex;
+import com.fauxpas.geometry.*;
 
 /**
  * Created by ajwerner on 12/28/13.
@@ -65,6 +62,10 @@ public class BreakPoint {
             g.addVertex(v);
             this.in.setOrigin(v);
             v.setIncidentHalfEdge(this.in);
+
+            Face f = g.getFace(s1);
+            f.addInnerComponents(this.in);
+            g.addFace(f);
         }
         else {
             this.e.setP2(vert);
@@ -72,10 +73,12 @@ public class BreakPoint {
             g.addVertex(v);
             this.out.setOrigin(v);
             v.setIncidentHalfEdge(this.out);
+
+            Face f = g.getFace(s2);
+            f.addInnerComponents(this.out);
+            g.addFace(f);
         }
 
-        //g.addHalfEdge(in);
-        //g.addHalfEdge(out);
     }
 
     public void finish(Graph g) {
@@ -86,6 +89,10 @@ public class BreakPoint {
             g.addVertex(v);
             this.in.setOrigin(v);
             v.setIncidentHalfEdge(this.in);
+
+            Face f = g.getFace(s1);
+            f.addInnerComponents(this.in);
+            g.addFace(f);
         }
         else {
             this.e.setP2(p);
@@ -93,10 +100,11 @@ public class BreakPoint {
             g.addVertex(v);
             this.out.setOrigin(v);
             v.setIncidentHalfEdge(this.out);
-        }
 
-        //g.addHalfEdge(in);
-        //g.addHalfEdge(out);
+            Face f = g.getFace(s2);
+            f.addInnerComponents(this.out);
+            g.addFace(f);
+        }
     }
 
     public Point getPoint() {

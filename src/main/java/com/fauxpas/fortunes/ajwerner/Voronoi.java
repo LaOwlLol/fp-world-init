@@ -23,10 +23,7 @@
 
 package com.fauxpas.fortunes.ajwerner;
 
-import com.fauxpas.geometry.Graph;
-import com.fauxpas.geometry.HalfEdge;
-import com.fauxpas.geometry.Point;
-import com.fauxpas.geometry.Vertex;
+import com.fauxpas.geometry.*;
 import javafx.animation.AnimationTimer;
 
 import java.util.*;

@@ -78,7 +78,7 @@ public class GraphRenderer {
                 if (edge.isFocused()) {
                     graphicsContext.setStroke(Color.RED);
                     graphicsContext.setLineWidth(focusedEdgeThickness);
-                    drawLine(edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
+                    drawArrow(edge.Origin().getCoordinates(), edge.Destination().getCoordinates());
                     graphicsContext.setLineWidth(defaultLineThickness);
                     graphicsContext.setStroke(Color.CORAL);
                 }
