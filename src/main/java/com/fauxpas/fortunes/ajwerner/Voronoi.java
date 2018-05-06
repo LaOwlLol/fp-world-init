@@ -166,7 +166,7 @@ public class Voronoi {
      * Finalize the graph.
      */
     public void finishBreakPoints() {
-        this.sweepLoc = 0;
+        this.sweepLoc = -1000;
         for (BreakPoint bp : breakPoints) {
             bp.finish(graph);
         }
