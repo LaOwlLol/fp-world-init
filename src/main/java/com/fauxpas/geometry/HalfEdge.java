@@ -18,7 +18,7 @@ public class HalfEdge {
     }
 
     public Vertex Destination() {
-        if (this.twin != null) {
+        if (hasTwin()) {
             return this.twin.Origin();
         }
         else {
@@ -64,6 +64,18 @@ public class HalfEdge {
 
     public void setFocused(boolean focused) {
         this.focused = focused;
+    }
+
+    public boolean hasTwin() {
+        return Twin() != null;
+    }
+
+    public boolean hasNext() {
+        return Next() != null;
+    }
+
+    public boolean hasPrev() {
+        return Prev() != null;
     }
 
     public HalfEdge() {

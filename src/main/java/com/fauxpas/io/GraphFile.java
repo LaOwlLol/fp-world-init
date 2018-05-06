@@ -1,9 +1,6 @@
 package com.fauxpas.io;
 
-import com.fauxpas.geometry.Graph;
-import com.fauxpas.geometry.HalfEdge;
-import com.fauxpas.geometry.Point;
-import com.fauxpas.geometry.Vertex;
+import com.fauxpas.geometry.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -136,23 +133,33 @@ public class GraphFile {
             String[] p1 = verts[0].split(",");
             String[] p2 = verts[1].split(",");
 
+
             Vertex o1 = graph.getVertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1])));
-            HalfEdge v = new HalfEdge(o1);
+
 
             Vertex o2 = graph.getVertex(new Point(Double.parseDouble(p2[0]), Double.parseDouble(p2[1])));
+            HalfEdge v = new HalfEdge(o1);
             HalfEdge w = new HalfEdge(o2);
 
-
             o1.setIncidentHalfEdge(v);
-            o2.setIncidentHalfEdge(w);
+            //o2.setIncidentHalfEdge(w);
 
             v.setTwin(w);
             w.setTwin(v);
 
             graph.addHalfEdge(v);
-            graph.addHalfEdge(w);
+            //graph.addHalfEdge(w);
             graph.addVertex(o1);
-            graph.addVertex(o2);
+            //graph.addVertex(o2);
+
+            if (verts.length > 2) {
+                String[] p3 = verts[2].split(",");
+                Point s = new Point(Double.parseDouble(p3[0]), Double.parseDouble(p3[1]));
+                Face f = graph.getFace(s);
+                graph.addFace(f);
+                v.setIncidentFace(f);
+            }
+
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -235,6 +242,10 @@ public class GraphFile {
             data.append(h.Origin().getCoordinates().x()).append(",").append(h.Origin().getCoordinates().y());
             data.append(">");
             data.append(h.Destination().getCoordinates().x()).append(",").append(h.Destination().getCoordinates().y());
+            if (h.IncidentFace() != null) {
+                data.append(">");
+                data.append(h.IncidentFace().getSite().x()).append(",").append(h.IncidentFace().getSite().y());
+            }
             data.append("\n");
         }
         return data.toString();

@@ -1,15 +1,15 @@
 package com.fauxpas.geometry;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 public class Face {
 
     private Point site;
-    private ArrayList<HalfEdge> innerComponents;
+    private LinkedHashSet<HalfEdge> innerComponents;
     private HalfEdge outerComponent;
     private boolean focused;
 
-    public ArrayList<HalfEdge> InnerComponents() {
+    public LinkedHashSet<HalfEdge> InnerComponents() {
         return innerComponents;
     }
 
@@ -42,7 +42,7 @@ public class Face {
     }
 
     public Face() {
-        this.innerComponents = new ArrayList<HalfEdge>();
+        this.innerComponents = new LinkedHashSet<>();
         focused = false;
     }
 

@@ -66,6 +66,7 @@ public class BreakPoint {
             Face f = g.getFace(s1);
             f.addInnerComponents(this.in);
             g.addFace(f);
+            this.in.setIncidentFace(f);
         }
         else {
             this.e.setP2(vert);
@@ -77,6 +78,7 @@ public class BreakPoint {
             Face f = g.getFace(s2);
             f.addInnerComponents(this.out);
             g.addFace(f);
+            this.out.setIncidentFace(f);
         }
 
     }
@@ -93,6 +95,7 @@ public class BreakPoint {
             Face f = g.getFace(s1);
             f.addInnerComponents(this.in);
             g.addFace(f);
+            this.in.setIncidentFace(f);
         }
         else {
             this.e.setP2(p);
@@ -104,6 +107,7 @@ public class BreakPoint {
             Face f = g.getFace(s2);
             f.addInnerComponents(this.out);
             g.addFace(f);
+            this.out.setIncidentFace(f);
         }
     }
 
