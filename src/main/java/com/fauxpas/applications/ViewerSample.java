@@ -1,5 +1,6 @@
 package com.fauxpas.applications;
 
+import com.fauxpas.geometry.Face;
 import com.fauxpas.geometry.Graph;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Vertex;
@@ -34,6 +35,10 @@ public class ViewerSample extends Application {
     private Button nextVert;
     private boolean incomingToggle;
     private Button inOut;
+    private Button clearVert;
+    private Face currentFace;
+    private Button nextFace;
+    private Button clearFace;
 
     public ViewerSample() {
         this.padding = 100;
@@ -69,17 +74,22 @@ public class ViewerSample extends Application {
         });
 
         currentVert = null;
-        nextVert = new Button(">>");
+        nextVert = new Button("Vert->");
         nextVert.setLayoutY(height - (padding/2));
         nextVert.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                selectNextVert();
+                if (graph != null) {
+                    toggleVertFocus(currentVert, false);
+                    currentVert = getNthVert(ThreadLocalRandom.current().nextInt(0, graph.getVertices().size()));
+                    toggleVertFocus(currentVert, true);
+                }
             }
         });
 
         inOut = new Button("I/O");
-        inOut.setLayoutY(height - (padding/2)+50);
+        inOut.setLayoutX((padding/2)+20);
+        inOut.setLayoutY(height - (padding/2));
         inOut.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -89,25 +99,53 @@ public class ViewerSample extends Application {
             }
         });
 
+        clearVert = new Button("clear");
+        clearVert.setLayoutX(padding+20);
+        clearVert.setLayoutY(height - (padding/2));
+        clearVert.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                toggleVertFocus(currentVert, false);
+                currentVert = null;
+            }
+        });
+
+        currentFace = null;
+        nextFace = new Button("Face->");
+        nextFace.setLayoutY(height - (padding/2)+30);
+        nextFace.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (graph != null) {
+                    toggleFaceFocus(currentFace, false);
+                    currentFace = getNthFace(ThreadLocalRandom.current().nextInt(0, graph.getFaces().size()));
+                    toggleFaceFocus(currentFace, true);
+                }
+            }
+        });
+
+        clearFace = new Button("clear");
+        clearFace.setLayoutX(padding-25);
+        clearFace.setLayoutY(height - (padding/2)+30);
+        clearFace.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                toggleFaceFocus(currentFace, false);
+                currentFace = null;
+            }
+        });
+
         root.getChildren().add(canvas);
         root.getChildren().add(load);
         root.getChildren().add(saveName);
         root.getChildren().add(nextVert);
         root.getChildren().add(inOut);
+        root.getChildren().add(clearVert);
+        root.getChildren().add(nextFace);
+        root.getChildren().add(clearFace);
 
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
-
-    }
-
-    private void selectNextVert() {
-        if (graph == null) {
-            return;
-        }
-
-        toggleVertFocus(currentVert, false);
-        currentVert = getNthVert(ThreadLocalRandom.current().nextInt(0, graph.getVertices().size()));
-        toggleVertFocus(currentVert, true);
 
     }
 
@@ -135,6 +173,26 @@ public class ViewerSample extends Application {
                 for (HalfEdge h : graph.outgoingHalfEdges(v)) {
                     h.setFocused(focus);
                 }
+            }
+        }
+    }
+
+    private Face getNthFace(int n)  {
+        if (graph == null) {
+            return null;
+        }
+
+        return graph.getFace(n);
+    }
+
+    private void toggleFaceFocus(Face f, boolean focus) {
+        if (graph == null) {
+            return;
+        }
+
+        if (f != null) {
+            for (HalfEdge e: f.InnerComponents()) {
+                e.setFocused(focus);
             }
         }
     }

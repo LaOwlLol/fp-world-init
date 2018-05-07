@@ -20,12 +20,12 @@ public class GraphRenderer {
     public GraphRenderer(GraphicsContext _graphicsContext, double _width, double _height) {
         this.graphicsContext = _graphicsContext;
         this.defaultLineThickness = graphicsContext.getLineWidth();
-        this.focusedEdgeThickness = this.defaultLineThickness + Math.max(1, this.defaultLineThickness*2);
+        this.focusedEdgeThickness = this.defaultLineThickness + Math.max(1, this.defaultLineThickness*3);
         this.width = _width;
         this.height = _height;
         this.siteRadius = 4;
         this.vertRadius = 6;
-        this.focusedVertRadius = 8;
+        this.focusedVertRadius = 10;
 
     }
 

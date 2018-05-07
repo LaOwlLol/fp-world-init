@@ -107,6 +107,23 @@ public class Graph {
         this.faces.add(f);
     }
 
+    /**
+     * Get the nth Face
+     * @param n Index face to fetch.
+     * @return  The nth face or null if out of range.
+     */
+    public Face getFace(int n) {
+        int i = 0;
+        for (Face f: getFaces()) {
+            if (i == n) {
+                return f;
+            }
+            i++;
+        }
+
+        return null;
+    }
+
     public Face getFace(Point loc) {
         Face f = containsPointAsFace(loc);
         if (f != null) {

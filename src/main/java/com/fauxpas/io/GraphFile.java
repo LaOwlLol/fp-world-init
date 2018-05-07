@@ -158,6 +158,7 @@ public class GraphFile {
                 Face f = graph.getFace(s);
                 graph.addFace(f);
                 v.setIncidentFace(f);
+                f.addInnerComponents(v);
             }
 
         }
