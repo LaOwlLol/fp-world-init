@@ -102,4 +102,8 @@ public class HalfEdge {
         this.setNext(next);
         this.setPrev(prev);
     }
+
+    public boolean hasIncidentFace() {
+        return this.IncidentFace() != null;
+    }
 }

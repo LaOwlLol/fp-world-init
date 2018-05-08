@@ -16,6 +16,8 @@ public class GraphFile {
     private static final String SITES_KEY = "SITES";
     private static final String HALFEDGES_KEY = "HALFEDGES";
     private static final String NEW_LINE = "\n";
+    private static final String COORD_DELIM = ",";
+    private static final String TOKEN_DELIM = ">";
     private static final int HALFEDGES_STATE = 0;
     private static final int SITES_STATE = 1;
     private static final int FAILED_READ_PROC = -1;
@@ -129,36 +131,44 @@ public class GraphFile {
     private int processHalfEdge(String line, Graph graph) {
 
         try {
-            String[] verts = line.split(">");
-            String[] p1 = verts[0].split(",");
-            String[] p2 = verts[1].split(",");
+            String[] verts = line.split(TOKEN_DELIM);
+            String[] p1 = verts[0].split(COORD_DELIM);
+            String[] p2 = verts[1].split(COORD_DELIM);
 
 
             Vertex o1 = graph.getVertex(new Point(Double.parseDouble(p1[0]), Double.parseDouble(p1[1])));
-
+            HalfEdge v = new HalfEdge(o1);
 
             Vertex o2 = graph.getVertex(new Point(Double.parseDouble(p2[0]), Double.parseDouble(p2[1])));
-            HalfEdge v = new HalfEdge(o1);
             HalfEdge w = new HalfEdge(o2);
 
             o1.setIncidentHalfEdge(v);
-            //o2.setIncidentHalfEdge(w);
+            o2.setIncidentHalfEdge(w);
 
             v.setTwin(w);
             w.setTwin(v);
 
             graph.addHalfEdge(v);
-            //graph.addHalfEdge(w);
+            graph.addHalfEdge(w);
             graph.addVertex(o1);
-            //graph.addVertex(o2);
+            graph.addVertex(o2);
 
             if (verts.length > 2) {
-                String[] p3 = verts[2].split(",");
-                Point s = new Point(Double.parseDouble(p3[0]), Double.parseDouble(p3[1]));
-                Face f = graph.getFace(s);
-                graph.addFace(f);
-                v.setIncidentFace(f);
-                f.addInnerComponents(v);
+                String[] p3 = verts[2].split(COORD_DELIM);
+                Point s1 = new Point(Double.parseDouble(p3[0]), Double.parseDouble(p3[1]));
+                Face f1 = graph.getFace(s1);
+                graph.addFace(f1);
+                v.setIncidentFace(f1);
+                f1.addInnerComponents(v);
+
+                if (verts.length > 3) {
+                    String[] p4 = verts[3].split(COORD_DELIM);
+                    Point s2 = new Point(Double.parseDouble(p4[0]), Double.parseDouble(p4[1]));
+                    Face f2 = graph.getFace(s2);
+                    graph.addFace(f2);
+                    w.setIncidentFace(f2);
+                    f2.addInnerComponents(w);
+                }
             }
 
         }
@@ -172,7 +182,7 @@ public class GraphFile {
 
     private int processSite(String line, Graph graph) {
         try {
-            String[] coords = line.split(",");
+            String[] coords = line.split(COORD_DELIM);
             graph.addSite(new Point(Double.parseDouble(coords[0]), Double.parseDouble(coords[1])));
         }
         catch (Exception e) {
@@ -240,14 +250,20 @@ public class GraphFile {
     private String graphEdgesToString(Graph graph) {
         StringBuilder data = new StringBuilder();
         for (HalfEdge h: graph.getEdges()) {
-            data.append(h.Origin().getCoordinates().x()).append(",").append(h.Origin().getCoordinates().y());
-            data.append(">");
-            data.append(h.Destination().getCoordinates().x()).append(",").append(h.Destination().getCoordinates().y());
-            if (h.IncidentFace() != null) {
-                data.append(">");
-                data.append(h.IncidentFace().getSite().x()).append(",").append(h.IncidentFace().getSite().y());
+            data.append(h.Origin().getCoordinates().x()).append(COORD_DELIM).append(h.Origin().getCoordinates().y());
+            data.append(TOKEN_DELIM);
+            data.append(h.Destination().getCoordinates().x()).append(COORD_DELIM).append(h.Destination().getCoordinates().y());
+            if (h.hasIncidentFace()) {
+                data.append(TOKEN_DELIM);
+                data.append(h.IncidentFace().getSite().x()).append(COORD_DELIM).append(h.IncidentFace().getSite().y());
+                if (h.hasTwin()) {
+                    if (h.Twin().hasIncidentFace()) {
+                        data.append(TOKEN_DELIM);
+                        data.append(h.Twin().IncidentFace().getSite().x()).append(COORD_DELIM).append(h.Twin().IncidentFace().getSite().y());
+                    }
+                }
             }
-            data.append("\n");
+            data.append(NEW_LINE);
         }
         return data.toString();
     }
@@ -255,7 +271,7 @@ public class GraphFile {
     private String graphSitesToString(Graph graph) {
         StringBuilder data = new StringBuilder();
         for (Point s: graph.getSites()) {
-            data.append(s.x()).append(",").append(s.y()).append("\n");
+            data.append(s.x()).append(COORD_DELIM).append(s.y()).append(NEW_LINE);
         }
         return data.toString();
     }
