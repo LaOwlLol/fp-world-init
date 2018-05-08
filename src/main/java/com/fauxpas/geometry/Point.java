@@ -147,10 +147,8 @@ public class Point implements Comparable<Point>{
         return 1;
     }
 
-
     public String toString() {
-        return String.format("(%.3f, %.3f)", this.x, this.y);
+        return String.format("%.3f,%.3f", this.x, this.y);
     }
-
 
 }

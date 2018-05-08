@@ -250,16 +250,16 @@ public class GraphFile {
     private String graphEdgesToString(Graph graph) {
         StringBuilder data = new StringBuilder();
         for (HalfEdge h: graph.getEdges()) {
-            data.append(h.Origin().getCoordinates().x()).append(COORD_DELIM).append(h.Origin().getCoordinates().y());
+            data.append(h.Origin().getCoordinates().toString());
             data.append(TOKEN_DELIM);
-            data.append(h.Destination().getCoordinates().x()).append(COORD_DELIM).append(h.Destination().getCoordinates().y());
+            data.append(h.Destination().getCoordinates().toString());
             if (h.hasIncidentFace()) {
                 data.append(TOKEN_DELIM);
-                data.append(h.IncidentFace().getSite().x()).append(COORD_DELIM).append(h.IncidentFace().getSite().y());
+                data.append(h.IncidentFace().getSite().toString());
                 if (h.hasTwin()) {
                     if (h.Twin().hasIncidentFace()) {
                         data.append(TOKEN_DELIM);
-                        data.append(h.Twin().IncidentFace().getSite().x()).append(COORD_DELIM).append(h.Twin().IncidentFace().getSite().y());
+                        data.append(h.Twin().IncidentFace().getSite().toString());
                     }
                 }
             }
