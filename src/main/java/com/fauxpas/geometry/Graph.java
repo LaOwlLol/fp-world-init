@@ -103,6 +103,10 @@ public class Graph {
         this.edges.add(e);
     }
 
+    public void removeHalfEdge(HalfEdge e) {
+        this.edges.remove(e);
+    }
+
     public void addFace(Face f) {
         this.faces.add(f);
     }

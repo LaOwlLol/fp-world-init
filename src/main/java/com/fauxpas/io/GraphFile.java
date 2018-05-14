@@ -18,11 +18,13 @@ public class GraphFile {
     private static final String NEW_LINE = "\n";
     private static final String COORD_DELIM = ",";
     private static final String TOKEN_DELIM = ">";
+    private static final String TOKEN_BLANK =  " -- ";
     private static final int HALFEDGES_STATE = 0;
     private static final int SITES_STATE = 1;
     private static final int FAILED_READ_PROC = -1;
     private static final int LINE_SKIP_PROC = 0;
     private static final int SUCCESS_READ_PROC = 1;
+
 
     private Charset charset;
     private Path filePath;
@@ -153,22 +155,24 @@ public class GraphFile {
             graph.addVertex(o1);
             graph.addVertex(o2);
 
-            if (verts.length > 2) {
+
+            if (verts[2].contains(COORD_DELIM)) {
                 String[] p3 = verts[2].split(COORD_DELIM);
                 Point s1 = new Point(Double.parseDouble(p3[0]), Double.parseDouble(p3[1]));
                 Face f1 = graph.getFace(s1);
                 graph.addFace(f1);
                 v.setIncidentFace(f1);
                 f1.addInnerComponents(v);
+            }
 
-                if (verts.length > 3) {
-                    String[] p4 = verts[3].split(COORD_DELIM);
-                    Point s2 = new Point(Double.parseDouble(p4[0]), Double.parseDouble(p4[1]));
-                    Face f2 = graph.getFace(s2);
-                    graph.addFace(f2);
-                    w.setIncidentFace(f2);
-                    f2.addInnerComponents(w);
-                }
+
+            if (verts[3].contains(COORD_DELIM)) {
+                String[] p4 = verts[3].split(COORD_DELIM);
+                Point s2 = new Point(Double.parseDouble(p4[0]), Double.parseDouble(p4[1]));
+                Face f2 = graph.getFace(s2);
+                graph.addFace(f2);
+                w.setIncidentFace(f2);
+                f2.addInnerComponents(w);
             }
 
         }
@@ -253,16 +257,32 @@ public class GraphFile {
             data.append(h.Origin().getCoordinates().toString());
             data.append(TOKEN_DELIM);
             data.append(h.Destination().getCoordinates().toString());
+
+
+            data.append(TOKEN_DELIM);
+
             if (h.hasIncidentFace()) {
-                data.append(TOKEN_DELIM);
                 data.append(h.IncidentFace().getSite().toString());
-                if (h.hasTwin()) {
-                    if (h.Twin().hasIncidentFace()) {
-                        data.append(TOKEN_DELIM);
-                        data.append(h.Twin().IncidentFace().getSite().toString());
-                    }
-                }
             }
+            else {
+                data.append(TOKEN_BLANK);
+            }
+
+            data.append(TOKEN_DELIM);
+
+            if (h.hasTwin()) {
+                if (h.Twin().hasIncidentFace()) {
+                    data.append(h.Twin().IncidentFace().getSite().toString());
+                }
+                else {
+                    data.append(TOKEN_BLANK);
+                }
+                //graph.removeHalfEdge(h.Twin());
+            }
+            else {
+                data.append(TOKEN_BLANK);
+            }
+
             data.append(NEW_LINE);
         }
         return data.toString();
