@@ -1,6 +1,7 @@
 package com.fauxpas.applications;
 
 import com.fauxpas.fortunes.ajwerner.Voronoi;
+import com.fauxpas.geometry.Face;
 import com.fauxpas.geometry.HalfEdge;
 import com.fauxpas.geometry.Vertex;
 import com.fauxpas.io.GraphFile;
@@ -34,6 +35,9 @@ public class GeneratorSample extends Application {
     private AnimationTimer animation;
     private Vertex currentVert;
     private Button nextVert;
+    private Face currentFace;
+    private Button nextFace;
+    private Button clearFace;
 
     public GeneratorSample() {
         this.padding = 100;
@@ -88,11 +92,38 @@ public class GeneratorSample extends Application {
             }
         });
 
+        currentFace = null;
+        nextFace = new Button("Face->");
+        nextFace.setLayoutY(height - (padding/2)+30);
+        nextFace.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (voronoi.getGraph() != null) {
+                    toggleFaceFocus(currentFace, false);
+                    currentFace = getNthFace(ThreadLocalRandom.current().nextInt(0, voronoi.getGraph().getFaces().size()));
+                    toggleFaceFocus(currentFace, true);
+                }
+            }
+        });
+
+        clearFace = new Button("clear");
+        clearFace.setLayoutX(padding-25);
+        clearFace.setLayoutY(height - (padding/2)+30);
+        clearFace.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                toggleFaceFocus(currentFace, false);
+                currentFace = null;
+            }
+        });
+
         root.getChildren().add(canvas);
         root.getChildren().add(save);
         root.getChildren().add(saveName);
         root.getChildren().add(regen);
         root.getChildren().add(nextVert);
+        root.getChildren().add(nextFace);
+        root.getChildren().add(clearFace);
 
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
@@ -154,6 +185,26 @@ public class GeneratorSample extends Application {
             v.setFocused(focus);
             for (HalfEdge h: voronoi.getGraph().outgoingHalfEdges(v)) {
                 h.setFocused(focus);
+            }
+        }
+    }
+
+    private Face getNthFace(int n)  {
+        if (voronoi.getGraph() == null) {
+            return null;
+        }
+
+        return voronoi.getGraph().getFace(n);
+    }
+
+    private void toggleFaceFocus(Face f, boolean focus) {
+        if (voronoi.getGraph() == null) {
+            return;
+        }
+
+        if (f != null) {
+            for (HalfEdge e: f.InnerComponents()) {
+                e.setFocused(focus);
             }
         }
     }
