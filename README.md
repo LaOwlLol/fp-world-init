@@ -1,4 +1,5 @@
-# fp-world-init - A computational geometry demo intended for used in map generation.
+# fp-world-init :
+_A computational geometry demo intended for use in map generation._
 
 This project is still very much a work in progress.  It was intended as a tool for map generation. The target end goal is be something like [this](http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/) with interactive tools for editing.
 
