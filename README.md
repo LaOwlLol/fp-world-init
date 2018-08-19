@@ -34,7 +34,7 @@ The application will animate the creation of a graph with fortune's algorithm.
    - **Face->** - selects all the edges adjacent to a face (due to incomplete graph model this does not not work properly).
    - **clear** - clears the face selection.
    
-You can save the graph out to a file with the save button. By default it will be saved to ~/home/<username>/VoronoiGraphs/voronoi (on linux).  You can change the file name (not the location) by typing a name in the text field next to the save button.
+You can save the graph out to a file with the save button. By default it will be saved to /home/username/VoronoiGraphs/voronoi (on linux).  You can change the file name (not the location) by typing a name in the text field next to the save button.
 
 #### View a Map
 
@@ -44,7 +44,7 @@ To view a map saved from the generator application run the gradle task 'view'.
 ./gradlew view
 ```
 
-You will need to type in the name of a file to load from ~/home/<username>/VoronoiGraphs/  and **_press_** the **load** button.  By default the file attempted to load would be 'voronoi'.
+You will need to type in the name of a file to load from /home/username/VoronoiGraphs/  and **_press_** the **load** button.  By default the file attempted to load would be 'voronoi'.
 
    ##### Controls: 
    - **Vert->** - select a vertex and its adjacent edges.
